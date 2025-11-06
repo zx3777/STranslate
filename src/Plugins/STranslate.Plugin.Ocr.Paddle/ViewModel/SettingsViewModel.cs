@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace STranslate.Plugin.Ocr.Paddle.ViewModel;
 
@@ -10,5 +11,19 @@ public partial class SettingsViewModel(IPluginContext context, Settings settings
     {
         settings.ModelsDirectory = value;
         context.SaveSettingStorage<Settings>();
+    }
+
+    [RelayCommand]
+    private void SelectFolder()
+    {
+        var dialot = new FolderBrowserDialog
+        {
+            Multiselect = false,
+            RootFolder = Environment.SpecialFolder.DesktopDirectory,
+        };
+        if (dialot.ShowDialog() != DialogResult.OK)
+            return;
+
+        ModelsDirectory = dialot.SelectedPath;
     }
 }

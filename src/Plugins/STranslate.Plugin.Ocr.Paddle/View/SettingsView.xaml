@@ -13,15 +13,27 @@
     mc:Ignorable="d">
 
     <ikw:SimpleStackPanel Spacing="12">
-        <!--  API URL 配置  -->
-        <ui:SettingsCard Description="{DynamicResource STranslate_Plugin_Ocr_Paddle_ModelsDirectory}" Header="{DynamicResource STranslate_Plugin_Ocr_Paddle_ModelsDirectory_Description}">
-            <ui:SettingsCard.HeaderIcon>
+        <!--  模型位置配置  -->
+        <ui:SettingsExpander Description="{DynamicResource STranslate_Plugin_Ocr_Paddle_ModelsDirectory_Description}" Header="{DynamicResource STranslate_Plugin_Ocr_Paddle_ModelsDirectory}">
+            <ui:SettingsExpander.HeaderIcon>
                 <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Location_20_Regular}" />
-            </ui:SettingsCard.HeaderIcon>
-            <TextBox
-                MinWidth="300"
-                ui:ControlHelper.PlaceholderText="./Models"
-                Text="{Binding ModelsDirectory}" />
-        </ui:SettingsCard>
+            </ui:SettingsExpander.HeaderIcon>
+            <Button Command="{Binding SelectFolderCommand}" Style="{StaticResource AccentButtonStyle}">
+                <ui:IconAndText Content="选择" Icon="{x:Static ui:FluentSystemIcons.Folder_20_Regular}" />
+            </Button>
+
+            <ui:SettingsExpander.Items>
+                <ui:SettingsCard>
+                    <ui:SettingsCard.Header>
+                        <TextBox
+                            MinWidth="300"
+                            ui:ControlHelper.PlaceholderText="点击上方按钮选择"
+                            IsReadOnly="True"
+                            Text="{Binding ModelsDirectory}"
+                            TextWrapping="Wrap" />
+                    </ui:SettingsCard.Header>
+                </ui:SettingsCard>
+            </ui:SettingsExpander.Items>
+        </ui:SettingsExpander>
     </ikw:SimpleStackPanel>
 </UserControl>

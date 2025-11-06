@@ -4,8 +4,7 @@ using Sdcb.OpenVINO.PaddleOCR.Models;
 using Sdcb.OpenVINO.PaddleOCR.Models.Online;
 using STranslate.Plugin.Ocr.Paddle.View;
 using STranslate.Plugin.Ocr.Paddle.ViewModel;
-using System.IO;
-using System.Windows.Controls;
+using Control = System.Windows.Controls.Control;
 
 namespace STranslate.Plugin.Ocr.Paddle;
 
