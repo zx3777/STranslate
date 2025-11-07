@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace STranslate.Plugin.Translate.Google.ViewModel;
+namespace STranslate.Plugin.Translate.GoogleBuiltIn.ViewModel;
 
 public partial class SettingsViewModel(IPluginContext context, Main main) : ObservableObject
 {

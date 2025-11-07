@@ -1,4 +1,4 @@
-namespace STranslate.Plugin.Translate.Google.View;
+namespace STranslate.Plugin.Translate.GoogleBuiltIn.View;
 
 public partial class SettingsView
 {

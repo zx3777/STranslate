@@ -1,10 +1,10 @@
-using STranslate.Plugin.Translate.Google.View;
-using STranslate.Plugin.Translate.Google.ViewModel;
+using STranslate.Plugin.Translate.GoogleBuiltIn.View;
+using STranslate.Plugin.Translate.GoogleBuiltIn.ViewModel;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Windows.Controls;
 
-namespace STranslate.Plugin.Translate.Google;
+namespace STranslate.Plugin.Translate.GoogleBuiltIn;
 
 public class Main : TranslatePluginBase
 {

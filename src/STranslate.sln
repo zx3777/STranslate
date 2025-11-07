@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{02EA681E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{5AB03004-BE0C-4B0A-9458-55324D128FD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STranslate.Plugin.Translate.Google", "Plugins\STranslate.Plugin.Translate.Google\STranslate.Plugin.Translate.Google.csproj", "{5DEA957F-1909-4F1C-BDF5-BA19C7D43BE5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STranslate.Plugin.Translate.GoogleBuiltIn", "Plugins\STranslate.Plugin.Translate.GoogleBuiltIn\STranslate.Plugin.Translate.GoogleBuiltIn.csproj", "{5DEA957F-1909-4F1C-BDF5-BA19C7D43BE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STranslate.Plugin.Translate.MTranServer", "Plugins\STranslate.Plugin.Translate.MTranServer\STranslate.Plugin.Translate.MTranServer.csproj", "{148169C6-266F-4BD6-BC44-94735AEAB30E}"
 EndProject
