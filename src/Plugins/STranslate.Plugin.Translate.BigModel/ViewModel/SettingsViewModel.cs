@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Text;
 
 namespace STranslate.Plugin.Translate.BigModel.ViewModel;
 
@@ -25,6 +26,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
         ApiKey = _settings.ApiKey;
         Model = _settings.Model;
         Models = new ObservableCollection<string>(_settings.Models);
+        Temperature = _settings.Temperature;
+        Thinking = _settings.Thinking;
 
         PropertyChanged += OnPropertyChanged;
         Models.CollectionChanged += OnModelsCollectionChanged;
@@ -54,6 +57,13 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             case nameof(Model):
                 _settings.Model = Model ?? string.Empty;
                 break;
+            case nameof(Temperature):
+                // 舍入到一位小数，避免浮点精度问题
+                _settings.Temperature = Math.Round(Temperature, 1);
+                break;
+            case nameof(Thinking):
+                _settings.Thinking = Thinking;
+                break;
             default:
                 return;
         }
@@ -66,6 +76,8 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
     [ObservableProperty] public partial string ApiKey { get; set; }
     [ObservableProperty] public partial string? Model { get; set; }
     [ObservableProperty] public partial ObservableCollection<string> Models { get; set; }
+    [ObservableProperty] public partial double Temperature { get; set; }
+    [ObservableProperty] public partial bool Thinking { get; set; }
 
     [RelayCommand]
     private void AddModel(string model)
@@ -134,13 +146,24 @@ public partial class SettingsViewModel : ObservableObject, IDisposable
             // 温度限定
             var temperature = Math.Clamp(_settings.Temperature, 0, 1);
 
-            var content = new { model, messages, temperature, stream = true };
+            var content = new
+            {
+                model,
+                messages,
+                temperature,
+                stream = true,
+                thinking = new
+                {
+                    type = Thinking ? "enabled" : "disabled"
+                }
+            };
 
+            var key = string.IsNullOrWhiteSpace(_settings.ApiKey) ? Encoding.UTF8.GetString(Convert.FromBase64String(Main.GetFallbackKey())) : _settings.ApiKey;
             var option = new Options
             {
                 Headers = new Dictionary<string, string>
                 {
-                    { "authorization", "Bearer " + BigModelAuthenication.GenerateToken(_settings.ApiKey, 60) }
+                    { "authorization", "Bearer " + BigModelAuthenication.GenerateToken(key, 60) }
                 }
             };
 

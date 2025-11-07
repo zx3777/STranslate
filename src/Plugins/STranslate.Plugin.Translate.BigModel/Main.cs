@@ -15,7 +15,7 @@ public class Main : LlmTranslatePluginBase
     private IPluginContext Context { get; set; } = null!;
 
     private readonly int[] _config = [90, 109, 69, 52, 77, 109, 77, 122, 79, 84, 99, 119, 78, 68, 85, 122, 78, 87, 69, 52, 78, 106, 107, 50, 77, 87, 78, 105, 77, 109, 90, 108, 79, 87, 81, 48, 79, 84, 107, 53, 77, 106, 103, 117, 87, 110, 74, 90, 87, 109, 120, 82, 90, 87, 49, 71, 99, 69, 48, 121, 86, 88, 82, 104, 87, 81, 61, 61];
-    private string GetFallbackKey() => string.Concat(_config.Select(x => (char)x));
+    internal string GetFallbackKey() => string.Concat(_config.Select(x => (char)x));
 
     public override void SelectPrompt(Prompt? prompt)
     {

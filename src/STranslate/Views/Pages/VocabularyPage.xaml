@@ -80,10 +80,9 @@
                 Background="{DynamicResource CardStrokeColorDefaultBrush}"
                 ResizeBehavior="PreviousAndNext"
                 ResizeDirection="Columns" />
-            <ContentControl
-                Grid.Column="2"
-                Margin="20,0,0,0"
-                Content="{Binding SettingUI}" />
+            <ui:ScrollViewerEx Grid.Column="2" Margin="20,0,0,0">
+                <ContentControl Content="{Binding SettingUI}" />
+            </ui:ScrollViewerEx>
         </Grid>
     </Grid>
 </ui:Page>
