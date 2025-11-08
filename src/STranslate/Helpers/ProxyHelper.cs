@@ -66,7 +66,7 @@ public class ProxyHelper
     {
         CommunityToolkit.Mvvm.DependencyInjection
             .Ioc.Default.GetRequiredService<ILogger<ProxyHelper>>()
-            .LogInformation("创建HttpHandler: {@ProxySettings}", new
+            .LogDebug("创建HttpHandler: {@ProxySettings}", new
             {
                 proxySettings.IsEnabled,
                 proxySettings.ProxyType,
