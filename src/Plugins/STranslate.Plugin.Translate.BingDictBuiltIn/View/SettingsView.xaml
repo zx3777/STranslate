@@ -26,8 +26,8 @@
 
             <ui:ToggleSwitch
                 IsOn="{Binding EnableSentenceExample}"
-                OffContent="{DynamicResource Off}"
-                OnContent="{DynamicResource On}" />
+                OffContent="{DynamicResource Disable}"
+                OnContent="{DynamicResource Enable}" />
         </ui:SettingsCard>
     </ikw:SimpleStackPanel>
 </UserControl>
