@@ -49,15 +49,31 @@
                     <ui:FontIcon FontSize="{DynamicResource STControlFontSize16}" Icon="{x:Static ui:FluentSystemIcons.Filter_20_Regular}" />
                     <ui:FlyoutService.Flyout>
                         <ui:MenuFlyout Placement="BottomEdgeAlignedLeft">
-                            <MenuItem Header="名称">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextSortAscending_20_Regular}" />
-                                </MenuItem.Icon>
+                            <MenuItem Command="{Binding SortByNameCommand}" Header="名称">
+                                <!--<MenuItem.Icon>
+                                    <ui:FontIcon>
+                                        <ui:FontIcon.Icon>
+                                            <MultiBinding Converter="{x:Static s:Converters.SortDirectionToIconConverter}">
+                                                <Binding Path="NameSortDirection" />
+                                                <Binding Source="{x:Static ui:FluentSystemIcons.TextSortAscending_20_Regular}" />
+                                                <Binding Source="{x:Static ui:FluentSystemIcons.TextSortDescending_20_Regular}" />
+                                            </MultiBinding>
+                                        </ui:FontIcon.Icon>
+                                    </ui:FontIcon>
+                                </MenuItem.Icon>-->
                             </MenuItem>
-                            <MenuItem Header="版本">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.DataBarVertical_20_Regular}" />
-                                </MenuItem.Icon>
+                            <MenuItem Command="{Binding SortByVersionCommand}" Header="版本">
+                                <!--<MenuItem.Icon>
+                                    <ui:FontIcon>
+                                        <ui:FontIcon.Icon>
+                                            <MultiBinding Converter="{x:Static s:Converters.SortDirectionToIconConverter}">
+                                                <Binding Path="VersionSortDirection" />
+                                                <Binding Source="{x:Static ui:FluentSystemIcons.DataBarVertical_20_Regular}" />
+                                                <Binding Source="{x:Static ui:FluentSystemIcons.DataBarVertical_20_Regular}" />
+                                            </MultiBinding>
+                                        </ui:FontIcon.Icon>
+                                    </ui:FontIcon>
+                                </MenuItem.Icon>-->
                             </MenuItem>
                         </ui:MenuFlyout>
                     </ui:FlyoutService.Flyout>

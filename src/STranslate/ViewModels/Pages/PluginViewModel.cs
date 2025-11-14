@@ -27,6 +27,9 @@ public partial class PluginViewModel : ObservableObject
 
     [ObservableProperty] public partial string FilterText { get; set; } = string.Empty;
 
+    [ObservableProperty] public partial ListSortDirection NameSortDirection { get; set; } = ListSortDirection.Ascending;
+    [ObservableProperty] public partial ListSortDirection VersionSortDirection { get; set; } = ListSortDirection.Ascending;
+
     public PluginViewModel(
         PluginInstance pluginInstance,
         Internationalization i18n,
@@ -76,6 +79,26 @@ public partial class PluginViewModel : ObservableObject
             || plugin.Description.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
 
         e.Accepted = typeMatch && textMatch;
+    }
+
+    private void ApplySort(string propertyName, ListSortDirection direction)
+    {
+        _pluginCollectionView.SortDescriptions.Clear();
+        _pluginCollectionView.SortDescriptions.Add(new SortDescription(propertyName, direction));
+    }
+
+    [RelayCommand]
+    private void SortByName()
+    {
+        NameSortDirection = NameSortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+        ApplySort(nameof(PluginMetaData.Name), NameSortDirection);
+    }
+
+    [RelayCommand]
+    private void SortByVersion()
+    {
+        VersionSortDirection = VersionSortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+        ApplySort(nameof(PluginMetaData.Version), VersionSortDirection);
     }
 
     partial void OnPluginTypeChanged(PluginType value) => _pluginCollectionView.View?.Refresh();
