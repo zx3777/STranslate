@@ -269,7 +269,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Ignore
+            //TODO: 考虑提示用户取消操作
         }
         finally
         {
@@ -312,7 +312,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Ignore
+            //TODO: 考虑提示用户取消操作
         }
         finally
         {

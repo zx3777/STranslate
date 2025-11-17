@@ -333,6 +333,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
         TaskScheduler.UnobservedTaskException += (s, e) =>
         {
             _logger?.LogError(e.Exception, "Task异常");
+            e.SetObserved(); // 标记异常为已观察，防止应用程序崩溃
         };
     }
 

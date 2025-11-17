@@ -156,6 +156,10 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
 
             DisplayImage = Settings.IsOcrShowingAnnotated ? _annotatedImage : _sourceImage;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            //TODO: 考虑提示用户取消操作
+        }
         finally
         {
             IsExecuting = false;

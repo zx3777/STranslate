@@ -211,6 +211,10 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             DisplayImage = Settings.IsImTranShowingAnnotated ? _annotatedImage : _resultImage;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            //TODO: 考虑提示用户取消操作
+        }
         finally
         {
             IsExecuting = false;
