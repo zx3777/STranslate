@@ -105,6 +105,14 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+                        <ui:InfoBar
+                            Title="{DynamicResource NoLocationInfoTitle}"
+                            Margin="10"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="1000"
+                            IsOpen="{Binding IsNoLocationInfoVisible, Mode=TwoWay}"
+                            Message="{DynamicResource NoLocationInfoMessage}"
+                            Severity="Warning" />
 
                         <control:ImageZoom
                             x:Name="PART_ImageZoom"
@@ -465,13 +473,25 @@
                 </LinearGradientBrush>
             </Border.OpacityMask>
 
-            <ui:ProgressRing
-                x:Name="PART_ProgressRing"
-                Width="60"
-                Height="60"
+            <StackPanel
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                IsActive="{Binding IsExecuting}" />
+                Orientation="Vertical">
+                <ui:ProgressRing
+                    x:Name="PART_ProgressRing"
+                    Width="60"
+                    Height="60"
+                    Margin="0,0,0,16"
+                    IsActive="{Binding IsExecuting}" />
+
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="{DynamicResource STControlFontSize15}"
+                    FontWeight="Medium"
+                    Foreground="White"
+                    Text="{Binding ProcessRingText}"
+                    TextAlignment="Center" />
+            </StackPanel>
         </Border>
         <!--#endregion-->
     </Grid>

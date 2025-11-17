@@ -420,6 +420,8 @@
     <sys:String x:Key="Recognize">辨識</sys:String>
     <sys:String x:Key="RecognizeQrCode">辨識二維碼</sys:String>
     <sys:String x:Key="NoQrCodeFound">​​找不到二維碼</sys:String>
+    <sys:String x:Key="NoLocationInfoTitle">無位置信息</sys:String>
+    <sys:String x:Key="NoLocationInfoMessage">無法標註和在圖上選取文字。</sys:String>
 
     <sys:String x:Key="RecognizeLanguage">辨識語言</sys:String>
     <sys:String x:Key="TranslateLanguage">翻譯語言</sys:String>

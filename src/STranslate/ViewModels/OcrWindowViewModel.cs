@@ -81,6 +81,12 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
     public partial bool IsExecuting { get; set; } = false;
 
     [ObservableProperty]
+    public partial string ProcessRingText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsNoLocationInfoVisible { get; set; } = false;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(TranslateCommand))]
     public partial string Result { get; set; } = string.Empty;
 
@@ -117,6 +123,7 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         if (IsExecuting) return;
 
         IsExecuting = true;
+        ProcessRingText = _i18n.GetTranslation("RecognizingImageText");
         try
         {
             Clear();
@@ -140,6 +147,8 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
 
             if (!_lastOcrResult.IsSuccess || string.IsNullOrEmpty(_lastOcrResult.Text))
                 return;
+
+            IsNoLocationInfoVisible = !HasBoxPoints(_lastOcrResult);
 
             _annotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
             PopulateOcrWords(_lastOcrResult);
@@ -459,6 +468,7 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         DisplayImage = null;
         _lastOcrResult = null;
         IsShowingFitToWindow = false;
+        IsNoLocationInfoVisible = false;
         OcrWords.Clear();
     }
 
@@ -572,11 +582,8 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(image);
 
         // 没有位置信息的话返回原图
-        if (ocrResult?.OcrContents == null ||
-            ocrResult.OcrContents.All(x => x.BoxPoints?.Count == 0))
-        {
+        if (!HasBoxPoints(ocrResult))
             return image;
-        }
 
         var drawingVisual = new DrawingVisual();
 
@@ -629,6 +636,12 @@ public partial class OcrWindowViewModel : ObservableObject, IDisposable
         }
         geometry.Freeze();
         return geometry;
+    }
+
+    private static bool HasBoxPoints(OcrResult ocrResult)
+    {
+        return ocrResult.OcrContents != null &&
+               ocrResult.OcrContents.Any(content => content.BoxPoints != null && content.BoxPoints.Count > 0);
     }
 
     #endregion

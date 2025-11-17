@@ -419,6 +419,8 @@
     <sys:String x:Key="Recognize">Recognize</sys:String>
     <sys:String x:Key="RecognizeQrCode">Recognize QrCode</sys:String>
     <sys:String x:Key="NoQrCodeFound">No QrCode found</sys:String>
+    <sys:String x:Key="NoLocationInfoTitle">No Location Info</sys:String>
+    <sys:String x:Key="NoLocationInfoMessage">Unable to annotate or select text on the image.</sys:String>
 
     <sys:String x:Key="RecognizeLanguage">Recognize Language</sys:String>
     <sys:String x:Key="TranslateLanguage">Translate Language</sys:String>

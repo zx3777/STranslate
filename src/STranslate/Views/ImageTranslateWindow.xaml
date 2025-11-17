@@ -409,8 +409,7 @@
                     FontWeight="Medium"
                     Foreground="White"
                     Text="{Binding ProcessRingText}"
-                    TextAlignment="Center"
-                    Visibility="{Binding ProcessRingText, Converter={cnvt:EqualToVisibilityInverseConverter}}" />
+                    TextAlignment="Center" />
             </StackPanel>
         </Border>
     </Grid>
