@@ -106,13 +106,13 @@
                 Background="{DynamicResource CardStrokeColorDefaultBrush}"
                 ResizeBehavior="PreviousAndNext"
                 ResizeDirection="Columns" />
-            <Grid Grid.Column="2" Margin="20,0">
+            <Grid Grid.Column="2">
                 <control:STranslateBadge Visibility="{Binding SelectedItem, Converter={cnvt:EqualToVisibilityConverter}}" />
                 <ui:ScrollViewerEx>
                     <ContentControl Content="{Binding SelectedItem}">
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type core:HistoryModel}">
-                                <control:HistoryControl />
+                                <control:HistoryControl Margin="20,0" />
                             </DataTemplate>
                         </ContentControl.Resources>
                     </ContentControl>

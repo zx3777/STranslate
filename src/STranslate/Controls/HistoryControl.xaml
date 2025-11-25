@@ -122,22 +122,25 @@
                         </Grid.RowDefinitions>
 
                         <Grid VerticalAlignment="Top">
-                            <ikw:SimpleStackPanel
-                                HorizontalAlignment="Left"
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
                                 VerticalAlignment="Center"
-                                Orientation="Horizontal"
-                                Spacing="5">
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontFamily="{DynamicResource {x:Static ui:ThemeKeys.FluentSystemIconsKey}}"
-                                    FontSize="{DynamicResource STControlFontSize18}"
-                                    Text="&#xF0284;" />
+                                FontFamily="{DynamicResource {x:Static ui:ThemeKeys.FluentSystemIconsKey}}"
+                                FontSize="{DynamicResource STControlFontSize18}"
+                                Text="&#xF0284;" />
 
-                                <TextBlock Text="{Binding Time, StringFormat=yyyy/MM/dd HH:mm:ss}" />
-                            </ikw:SimpleStackPanel>
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="5,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding Time, StringFormat=yyyy/MM/dd HH:mm:ss}" />
 
                             <control:IconButton
-                                HorizontalAlignment="Right"
+                                Grid.Column="2"
                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ui:Page}, Path=DataContext.DeleteCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=control:HistoryControl}, Path=DataContext}"
                                 Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}" />
