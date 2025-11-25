@@ -75,13 +75,9 @@
             Modifiers="{Binding HotkeySettings.OpenHistoryHotkey.Key, Converter={cnvt:StringToKeyBindingConverter}, ConverterParameter={x:Static cnvt:HotkeyMode.Modifiers}}" />
     </Window.InputBindings>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="32" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
         <control:HeaderControl
-            Padding="6,3,6,0"
-            VerticalAlignment="Center"
+            Padding="6,4,6,0"
+            VerticalAlignment="Top"
             ColorSchemeCommand="{Binding ChangeColorSchemeCommand}"
             HistoryNextCommand="{Binding HistoryNextCommand}"
             HistoryPreviousCommand="{Binding HistoryPreviousCommand}"
@@ -95,7 +91,7 @@
             ScreenshotTranslateInImage="{Binding Settings.ScreenshotTranslateInImage}"
             SettingCommand="{Binding OpenSettingsCommand}" />
 
-        <ui:ScrollViewerEx Grid.Row="1" Margin="10,5">
+        <ui:ScrollViewerEx Margin="10,37,10,5">
             <StackPanel>
                 <!--  //  InputControl  //  -->
                 <control:InputControl
