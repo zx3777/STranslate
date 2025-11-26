@@ -23,22 +23,113 @@
             BorderThickness="{DynamicResource SettingsCardBorderThickness}"
             CornerRadius="{DynamicResource {x:Static ui:ThemeKeys.ControlCornerRadiusKey}}">
             <Border.Resources>
-                <ui:BindingProxy x:Key="VmProxy" Value="{Binding RelativeSource={RelativeSource AncestorType=control:ServicePanel}, Path=DataContext}" />
-                <ui:BindingProxy x:Key="SvcProxy" Value="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=DataContext}" />
+                <s:BindingProxy x:Key="VmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:ServicePanel}, Path=DataContext}" />
+                <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=DataContext}" />
             </Border.Resources>
             <Border.ContextMenu>
                 <ContextMenu>
                     <MenuItem
-                        Command="{Binding Source={StaticResource VmProxy}, Path=Value.DuplicateCommand}"
-                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Value}"
+                        Command="{Binding Source={StaticResource VmProxy}, Path=Data.DuplicateCommand}"
+                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
                         Header="{DynamicResource Duplicate}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.SaveCopy_24_Regular}" />
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem
-                        Command="{Binding Source={StaticResource VmProxy}, Path=Value.DeleteCommand}"
-                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Value}"
+                        Command="{Binding Source={StaticResource VmProxy}, Path=Data.DeleteCommand}"
+                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                        Header="{DynamicResource Delete}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </Border.ContextMenu>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="40" />
+                </Grid.ColumnDefinitions>
+                <Image Height="{DynamicResource STControlFontSize18}" Source="{Binding MetaData.IconPath}" />
+                <control:EditableTextBlock
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Text="{Binding DisplayName}"
+                    ToolTipService.ToolTip="{Binding DisplayName}" />
+                <control:Badge
+                    Grid.Column="2"
+                    Margin="3,0"
+                    IsOfficial="{Binding MetaData.IsPrePlugin}" />
+
+                <ui:ToggleSwitch
+                    Grid.Column="3"
+                    IsOn="{Binding IsEnabled}"
+                    OffContent=""
+                    OnContent="" />
+            </Grid>
+        </Border>
+
+        <DataTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="SvcCard" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorTertiaryBrushKey}}" />
+            </Trigger>
+            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                <Setter TargetName="SvcCard" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorSecondaryBrushKey}}" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DictionaryTemplate" DataType="plugin:Service">
+        <Border
+            x:Name="SvcCard"
+            MinWidth="{DynamicResource SettingsCardMinWidth}"
+            MinHeight="60"
+            Margin="0,4"
+            Padding="16,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Background="{DynamicResource {x:Static ui:ThemeKeys.SolidBackgroundFillColorQuarternaryBrushKey}}"
+            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+            BorderThickness="{DynamicResource SettingsCardBorderThickness}"
+            CornerRadius="{DynamicResource {x:Static ui:ThemeKeys.ControlCornerRadiusKey}}">
+            <Border.Resources>
+                <s:BindingProxy x:Key="VmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:ServicePanel}, Path=DataContext}" />
+                <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Border}, Path=DataContext}" />
+            </Border.Resources>
+            <Border.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{DynamicResource TransExecMode}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.GlanceHorizontalSparkles_20_Regular}" />
+                        </MenuItem.Icon>
+                        <MenuItem
+                            Header="{DynamicResource TransExecAutomatic}"
+                            IsCheckable="True"
+                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Automatic}" />
+                        <MenuItem
+                            Header="{DynamicResource TransExecManual}"
+                            IsCheckable="True"
+                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Manual}" />
+                        <MenuItem
+                            Header="{DynamicResource TransExecPinned}"
+                            IsCheckable="True"
+                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem
+                        Command="{Binding Source={StaticResource VmProxy}, Path=Data.DuplicateCommand}"
+                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                        Header="{DynamicResource Duplicate}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.SaveCopy_24_Regular}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        Command="{Binding Source={StaticResource VmProxy}, Path=Data.DeleteCommand}"
+                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
                         Header="{DynamicResource Delete}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_20_Regular}" />
@@ -292,6 +383,7 @@
 
     <control:ServicePanelItemSelector
         x:Key="ServicePanelItemSelector"
+        DictionaryTemplate="{StaticResource DictionaryTemplate}"
         NormalTemplate="{StaticResource NormalTemplate}"
         TranslateTemplate="{StaticResource TranslateTemplate}" />
 

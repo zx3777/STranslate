@@ -198,6 +198,7 @@
                                     Padding="0"
                                     Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.TemporaryTranslateCommand}"
                                     CommandParameter="{Binding}"
+                                    ToolTip="{Binding DisplayName}"
                                     Visibility="{Binding ExecMode, Converter={cnvt:ExecutionModeVisibilityConverter}, ConverterParameter=Pinned}">
                                     <Button.Resources>
                                         <s:BindingProxy x:Key="SvcProxy" Data="{Binding}" />

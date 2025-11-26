@@ -42,7 +42,7 @@
                                 <control:IconButton
                                     Command="{TemplateBinding SettingCommand}"
                                     Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}"
-                                    ToolTip="{DynamicResource OpenSettings}"
+                                    ToolTip="{DynamicResource Settings}"
                                     Visibility="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=IsSettingVisible, Converter={cnvt:BoolToVisibilityConverter}}" />
                                 <control:IconButton
                                     ui:ControlHelper.CornerRadius="6,0,0,6"
