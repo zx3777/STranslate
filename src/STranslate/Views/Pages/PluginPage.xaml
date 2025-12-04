@@ -60,6 +60,19 @@
                 DockPanel.Dock="Right"
                 Orientation="Horizontal"
                 Spacing="10">
+                <Button
+                    Command="{Binding BatchDeletePluginCommand}"
+                    CommandParameter="{Binding ElementName=PART_PluginListBox, Path=SelectedItems}"
+                    Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                    ToolTip="{DynamicResource DeleteSelected}"
+                    Visibility="{Binding IsMultiSelectMode, Converter={cnvt:BoolToVisibilityConverter}}">
+                    <ui:IconAndText Content="{DynamicResource Delete}" Icon="{x:Static ui:FluentSystemIcons.Delete_24_Regular}" />
+                </Button>
+
+                <Button Command="{Binding ToggleMultiSelectModeCommand}" ToolTip="{DynamicResource BatchOperation}">
+                    <ui:IconAndText Content="{DynamicResource BatchOperation}" Icon="{x:Static ui:FluentSystemIcons.TaskListSquareLtr_20_Regular}" />
+                </Button>
+
                 <Button Command="{Binding AddPluginCommand}">
                     <ui:IconAndText Content="{DynamicResource AddPlugin}" Icon="{x:Static ui:FluentSystemIcons.BotAdd_24_Regular}" />
                 </Button>
@@ -100,7 +113,6 @@
                 <TextBox
                     x:Name="PluginFilterTextbox"
                     Width="150"
-                    Margin="0,0,26,0"
                     VerticalAlignment="Center"
                     ui:ControlHelper.PlaceholderText="{DynamicResource SearchPlugin}"
                     Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
@@ -112,8 +124,9 @@
         </DockPanel>
 
         <ListBox
+            x:Name="PART_PluginListBox"
             Grid.Row="1"
-            Background="Transparent"
+            control:ListBoxSelectionBehavior.AutoDeselectPrePlugins="True"
             ItemsSource="{Binding PluginCollectionView}">
             <ListBox.Resources>
                 <s:BindingProxy x:Key="VmProxy" Data="{Binding}" />
@@ -127,78 +140,111 @@
                     </Setter>
                 </Style>
             </ListBox.Resources>
+            <ListBox.Style>
+                <Style BasedOn="{StaticResource {x:Type ListBox}}" TargetType="ListBox">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="SelectionMode" Value="Single" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMultiSelectMode}" Value="True">
+                            <Setter Property="SelectionMode" Value="Multiple" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.Style>
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="plugin:PluginMetaData">
-                    <ui:SettingsCard
-                        x:Name="PluginCard"
-                        Margin="0,3"
-                        Description="{Binding Description}"
-                        Header="{Binding Name}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <Image
-                                Width="24"
-                                Height="24"
-                                Source="{Binding IconPath}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <StackPanel>
-                            <StackPanel.Resources>
-                                <Style BasedOn="{StaticResource {x:Static ui:ThemeKeys.CaptionTextBlockStyleKey}}" TargetType="TextBlock">
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                </Style>
-                                <Style BasedOn="{StaticResource {x:Type control:IconButton}}" TargetType="control:IconButton">
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                    <Setter Property="IconSize" Value="11" />
-                                </Style>
-                                <Style x:Key="LinkBtnStyle" TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                    <Setter Property="Cursor" Value="Hand" />
-                                    <Setter Property="FontFamily" Value="{DynamicResource FluentSystemIcons}" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.ButtonForegroundPressedKey}}" />
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.ButtonForegroundDisabledKey}}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Resources>
-                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{Binding Author}" />
-                                <TextBlock Text="|" />
-                                <TextBlock Text="{Binding Version}" />
-                                <TextBlock Text="|" />
-                                <TextBlock Style="{StaticResource LinkBtnStyle}" Text="&#xF480;">
-                                    <TextBlock.InputBindings>
-                                        <MouseBinding
-                                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.OpenOfficialLinkCommand}"
-                                            CommandParameter="{Binding Website}"
-                                            MouseAction="LeftClick" />
-                                    </TextBlock.InputBindings>
-                                </TextBlock>
-                                <TextBlock
-                                    IsEnabled="{Binding IsPrePlugin, Converter={cnvt:BoolInverseConverter}}"
-                                    Style="{StaticResource LinkBtnStyle}"
-                                    Text="&#xF34C;">
-                                    <TextBlock.InputBindings>
-                                        <MouseBinding
-                                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.DeletePluginCommand}"
-                                            CommandParameter="{Binding}"
-                                            MouseAction="LeftClick" />
-                                    </TextBlock.InputBindings>
-                                </TextBlock>
-                                <TextBlock Style="{StaticResource LinkBtnStyle}" Text="&#xF418;">
-                                    <TextBlock.InputBindings>
-                                        <MouseBinding
-                                            Command="{Binding Source={StaticResource VmProxy}, Path=Data.OpenPluginDirectoryCommand}"
-                                            CommandParameter="{Binding}"
-                                            MouseAction="LeftClick" />
-                                    </TextBlock.InputBindings>
-                                </TextBlock>
-                            </ikw:SimpleStackPanel>
-                        </StackPanel>
-                    </ui:SettingsCard>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox
+                            Grid.Column="0"
+                            MinWidth="0"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsPrePlugin, Converter={cnvt:BoolInverseConverter}}"
+                            Visibility="{Binding Data.IsMultiSelectMode, Source={StaticResource ViewModelProxy}, Converter={cnvt:BoolToVisibilityConverter}}">
+                            <CheckBox.IsChecked>
+                                <MultiBinding Converter="{cnvt:PrePluginBoolMultiConverter}">
+                                    <Binding Path="IsPrePlugin" />
+                                    <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType=ListBoxItem}" />
+                                </MultiBinding>
+                            </CheckBox.IsChecked>
+                        </CheckBox>
+
+                        <ui:SettingsCard
+                            x:Name="PluginCard"
+                            Grid.Column="1"
+                            Margin="0,3"
+                            Description="{Binding Description}"
+                            Header="{Binding Name}">
+                            <ui:SettingsCard.HeaderIcon>
+                                <Image
+                                    Width="24"
+                                    Height="24"
+                                    Source="{Binding IconPath}" />
+                            </ui:SettingsCard.HeaderIcon>
+                            <StackPanel>
+                                <StackPanel.Resources>
+                                    <Style BasedOn="{StaticResource {x:Static ui:ThemeKeys.CaptionTextBlockStyleKey}}" TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                    <Style BasedOn="{StaticResource {x:Type control:IconButton}}" TargetType="control:IconButton">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="IconSize" Value="11" />
+                                    </Style>
+                                    <Style x:Key="LinkBtnStyle" TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Setter Property="FontFamily" Value="{DynamicResource FluentSystemIcons}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.ButtonForegroundPressedKey}}" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.ButtonForegroundDisabledKey}}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Resources>
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding Author}" />
+                                    <TextBlock Text="|" />
+                                    <TextBlock Text="{Binding Version}" />
+                                    <TextBlock Text="|" />
+                                    <TextBlock Style="{StaticResource LinkBtnStyle}" Text="&#xF480;">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding
+                                                Command="{Binding Source={StaticResource VmProxy}, Path=Data.OpenOfficialLinkCommand}"
+                                                CommandParameter="{Binding Website}"
+                                                MouseAction="LeftClick" />
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                    <TextBlock
+                                        IsEnabled="{Binding IsPrePlugin, Converter={cnvt:BoolInverseConverter}}"
+                                        Style="{StaticResource LinkBtnStyle}"
+                                        Text="&#xF34C;">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding
+                                                Command="{Binding Source={StaticResource VmProxy}, Path=Data.DeletePluginCommand}"
+                                                CommandParameter="{Binding}"
+                                                MouseAction="LeftClick" />
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource LinkBtnStyle}" Text="&#xF418;">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding
+                                                Command="{Binding Source={StaticResource VmProxy}, Path=Data.OpenPluginDirectoryCommand}"
+                                                CommandParameter="{Binding}"
+                                                MouseAction="LeftClick" />
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                </ikw:SimpleStackPanel>
+                            </StackPanel>
+                        </ui:SettingsCard>
+                    </Grid>
                     <DataTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="PluginCard" Property="Background" Value="{DynamicResource SystemFillColorAttentionBackgroundBrush}" />

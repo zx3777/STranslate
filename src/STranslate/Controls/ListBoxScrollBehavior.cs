@@ -5,13 +5,13 @@ using System.Windows.Input;
 
 namespace STranslate.Controls;
 
-public static class ListBoxHelper
+public static class ListBoxScrollBehavior
 {
     public static readonly DependencyProperty ScrollAtBottomCommandProperty =
         DependencyProperty.RegisterAttached(
             "ScrollAtBottomCommand",
             typeof(ICommand),
-            typeof(ListBoxHelper),
+            typeof(ListBoxScrollBehavior),
             new PropertyMetadata(null, OnScrollAtBottomCommandChanged));
 
     public static ICommand GetScrollAtBottomCommand(DependencyObject obj)

@@ -472,6 +472,10 @@
     <sys:String x:Key="PluginUpgradeConfirm">外掛程式 {0} 已安裝版本 {1}。是否要升級？</sys:String>
     <sys:String x:Key="PluginUpgradeSuccess">外掛程式升級準備就緒，重新啟動後生效</sys:String>
     <sys:String x:Key="PluginUpgradeFailed">插件升級失敗</sys:String>
+    <sys:String x:Key="BatchOperation">批次操作</sys:String>
+    <sys:String x:Key="DeleteSelected">刪除選中</sys:String>
+    <sys:String x:Key="NoPluginSelected">未選擇插件</sys:String>
+    <sys:String x:Key="BatchDeletePluginConfirm">已選擇 {0} 個插件，是否確認刪除？</sys:String>
 
     <!--  // Detect //  -->
     <sys:String x:Key="BaiduDetectError">百度識別錯誤</sys:String>

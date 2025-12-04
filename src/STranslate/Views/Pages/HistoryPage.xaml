@@ -58,7 +58,7 @@
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                 <ListBox
                     Grid.Row="1"
-                    control:ListBoxHelper.ScrollAtBottomCommand="{Binding LoadMoreCommand}"
+                    control:ListBoxScrollBehavior.ScrollAtBottomCommand="{Binding LoadMoreCommand}"
                     Background="Transparent"
                     ItemsSource="{Binding HistoryItems}"
                     SelectedItem="{Binding SelectedItem}">

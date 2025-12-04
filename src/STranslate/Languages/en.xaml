@@ -471,6 +471,10 @@
     <sys:String x:Key="PluginUpgradeConfirm">Plugin {0} is already installed with version {1}. Upgrade?</sys:String>
     <sys:String x:Key="PluginUpgradeSuccess">Plugin upgrade is ready, will take effect after restart</sys:String>
     <sys:String x:Key="PluginUpgradeFailed">Plugin upgrade failed</sys:String>
+    <sys:String x:Key="BatchOperation">Batch Operation</sys:String>
+    <sys:String x:Key="DeleteSelected">Delete Selected</sys:String>
+    <sys:String x:Key="NoPluginSelected">No plugin selected</sys:String>
+    <sys:String x:Key="BatchDeletePluginConfirm">Selected {0} plugin(s), confirm deletion?</sys:String>
 
     <!--  // Detect //  -->
     <sys:String x:Key="BaiduDetectError">Baidu detect error</sys:String>

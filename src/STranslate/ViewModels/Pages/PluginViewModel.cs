@@ -100,6 +100,65 @@ public partial class PluginViewModel : ObservableObject
     [ObservableProperty]
     public partial PluginType PluginType { get; set; } = PluginType.All;
 
+    [ObservableProperty]
+    public partial bool IsMultiSelectMode { get; set; }
+
+    [RelayCommand]
+    private void ToggleMultiSelectMode() => IsMultiSelectMode = !IsMultiSelectMode;
+
+    [RelayCommand]
+    private async Task BatchDeletePluginAsync(IList? items)
+    {
+        if (items?.Count is null or 0)
+        {
+            _snackbar.ShowWarning(_i18n.GetTranslation("NoPluginSelected"));
+            return;
+        }
+
+        var plugins = items.Cast<PluginMetaData>().ToList();
+
+        if (await new ContentDialog
+        {
+            Title = _i18n.GetTranslation("Prompt"),
+            CloseButtonText = _i18n.GetTranslation("Cancel"),
+            PrimaryButtonText = _i18n.GetTranslation("Confirm"),
+            DefaultButton = ContentDialogButton.Primary,
+            Content = string.Format(_i18n.GetTranslation("BatchDeletePluginConfirm"), plugins.Count),
+        }.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        var restart = false;
+        foreach (var plugin in plugins)
+        {
+            if (_pluginService.UninstallPlugin(plugin))
+                restart = true;
+        }
+
+        if (restart)
+        {
+            if (await new ContentDialog
+            {
+                Title = _i18n.GetTranslation("Prompt"),
+                CloseButtonText = _i18n.GetTranslation("Cancel"),
+                PrimaryButtonText = _i18n.GetTranslation("Confirm"),
+                DefaultButton = ContentDialogButton.Primary,
+                Content = _i18n.GetTranslation("PluginDeleteForRestart"),
+            }.ShowAsync() == ContentDialogResult.Primary)
+            {
+                UACHelper.Run(_settings.StartMode);
+                App.Current.Shutdown();
+            }
+        }
+        else
+        {
+            _snackbar.ShowWarning(_i18n.GetTranslation("PluginDeleteFailed"));
+        }
+
+        IsMultiSelectMode = false;
+    }
+
     private void OnPluginFilter(object sender, FilterEventArgs e)
     {
         if (e.Item is not PluginMetaData plugin)
