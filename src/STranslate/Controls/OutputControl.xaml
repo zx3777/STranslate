@@ -9,6 +9,38 @@
     xmlns:s="https://github.com/zggsong/2022/xaml"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:xf="clr-namespace:XamlFlair;assembly=XamlFlair.WPF">
+    <Style
+        x:Key="QuickSettingsButtonStyle"
+        BasedOn="{StaticResource {x:Type Button}}"
+        TargetType="Button">
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Expander}, Path=IsMouseOver}" Value="True">
+                <DataTrigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                To="1"
+                                Duration="0:0:0.1" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.EnterActions>
+                <DataTrigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                To="0"
+                                Duration="0:0:0.08" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </DataTrigger.ExitActions>
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 
     <!--#region Prompt ComboBox Selector-->
 
@@ -69,58 +101,6 @@
             </i:Interaction.Triggers>
             <Expander.Header>
                 <DockPanel>
-                    <DockPanel.Resources>
-                        <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Expander}, Path=DataContext}" />
-                        <s:BindingProxy x:Key="MainVmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=DataContext}" />
-                    </DockPanel.Resources>
-                    <DockPanel.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.SingleTranslateCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource ExecuteTranslation}"
-                                IsEnabled="{Binding Source={StaticResource SvcProxy}, Path=Data.Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultNoResultInverseBoolConverter}}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_24_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator />
-                            <MenuItem Header="{DynamicResource TransExecMode}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.GlanceHorizontalSparkles_20_Regular}" />
-                                </MenuItem.Icon>
-                                <MenuItem
-                                    Header="{DynamicResource TransExecAutomatic}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Automatic}" />
-                                <MenuItem
-                                    Header="{DynamicResource TransExecManual}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Manual}" />
-                                <MenuItem
-                                    Header="{DynamicResource TransExecPinned}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
-                            </MenuItem>
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.NavigateCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource ConfigureService}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Settings_24_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator />
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.CloseServiceCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource CloseService}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PictureInPictureExit_20_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </DockPanel.ContextMenu>
                     <ikw:SimpleStackPanel
                         Background="Transparent"
                         DockPanel.Dock="Left"
@@ -158,7 +138,6 @@
                                 Text="{Binding Plugin.DictionaryResult.Duration, StringFormat='\{0:ss\\.ff}'}" />
                         </ikw:SimpleStackPanel>
                     </ikw:SimpleStackPanel>
-                    <!--  // 为了铺满右侧空间，方便ContextMenu弹出 //  -->
                     <ikw:SimpleStackPanel
                         Background="Transparent"
                         DockPanel.Dock="Right"
@@ -170,9 +149,68 @@
                             Command="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=RetryCommand}"
                             CommandParameter="{Binding}"
                             Icon="{x:Static ui:FluentSystemIcons.ArrowSync_20_Regular}"
-                            IconSize="{DynamicResource STControlFontSize10}"
+                            IconSize="{DynamicResource STControlFontSize12}"
                             ToolTip="{DynamicResource Retry}"
                             Visibility="{Binding Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultTypeVisibilityConverter}, ConverterParameter=Error}" />
+
+                        <Button
+                            Padding="5,3"
+                            FlowDirection="LeftToRight"
+                            Style="{StaticResource QuickSettingsButtonStyle}">
+                            <ui:FontIcon FontSize="{DynamicResource STControlFontSize18}" Icon="{x:Static ui:FluentSystemIcons.SettingsCogMultiple_20_Regular}" />
+                            <Button.Resources>
+                                <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Expander}, Path=DataContext}" />
+                                <s:BindingProxy x:Key="MainVmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=DataContext}" />
+                            </Button.Resources>
+                            <ui:FlyoutService.Flyout>
+                                <ui:MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.SingleTranslateCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource ExecuteTranslation}"
+                                        IsEnabled="{Binding Source={StaticResource SvcProxy}, Path=Data.Plugin.DictionaryResult.ResultType, Converter={cnvt:DictionaryResultNoResultInverseBoolConverter}}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_24_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="{DynamicResource TransExecMode}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.GlanceHorizontalSparkles_20_Regular}" />
+                                        </MenuItem.Icon>
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecAutomatic}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Automatic}" />
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecManual}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Manual}" />
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecPinned}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
+                                    </MenuItem>
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.NavigateCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource ConfigureService}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Settings_24_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.CloseServiceCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource CloseService}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PictureInPictureExit_20_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ui:MenuFlyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
                     </ikw:SimpleStackPanel>
                 </DockPanel>
             </Expander.Header>
@@ -397,85 +435,6 @@
             </i:Interaction.Triggers>
             <Expander.Header>
                 <DockPanel>
-                    <DockPanel.Resources>
-                        <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Expander}, Path=DataContext}" />
-                        <s:BindingProxy x:Key="MainVmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=DataContext}" />
-                    </DockPanel.Resources>
-                    <DockPanel.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.SingleTranslateCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource ExecuteTranslation}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_20_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator />
-                            <MenuItem Header="{DynamicResource TransExecMode}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.GlanceHorizontalSparkles_20_Regular}" />
-                                </MenuItem.Icon>
-                                <MenuItem
-                                    Header="{DynamicResource TransExecAutomatic}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Automatic}" />
-                                <MenuItem
-                                    Header="{DynamicResource TransExecManual}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Manual}" />
-                                <MenuItem
-                                    Header="{DynamicResource TransExecPinned}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
-                            </MenuItem>
-                            <MenuItem Header="{DynamicResource AutoBackTranslation}">
-                                <MenuItem.Style>
-                                    <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-                                        <Setter Property="Icon">
-                                            <Setter.Value>
-                                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Flash_20_Regular}" />
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation}" Value="True">
-                                                <Setter Property="Icon">
-                                                    <Setter.Value>
-                                                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FlashAuto_20_Regular}" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </MenuItem.Style>
-                                <MenuItem
-                                    Header="{DynamicResource On}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation}" />
-                                <MenuItem
-                                    Header="{DynamicResource Off}"
-                                    IsCheckable="True"
-                                    IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation, Converter={cnvt:BoolInverseConverter}}" />
-                            </MenuItem>
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.NavigateCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource ConfigureService}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator />
-                            <MenuItem
-                                Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.CloseServiceCommand}"
-                                CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
-                                Header="{DynamicResource CloseService}">
-                                <MenuItem.Icon>
-                                    <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PictureInPictureExit_20_Regular}" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </DockPanel.ContextMenu>
                     <ikw:SimpleStackPanel
                         Background="Transparent"
                         DockPanel.Dock="Left"
@@ -538,7 +497,6 @@
                             <TextBlock Text="{Binding Plugin.TransBackResult.Duration, StringFormat='\{0:ss\\.ff}'}" Visibility="{Binding Plugin.TransBackResult.Duration, Converter={cnvt:TimeSpanToVisibilityConverter}}" />
                         </StackPanel>
                     </ikw:SimpleStackPanel>
-                    <!--  // 为了铺满右侧空间，方便ContextMenu弹出 //  -->
                     <ikw:SimpleStackPanel
                         Background="Transparent"
                         DockPanel.Dock="Right"
@@ -550,9 +508,95 @@
                             Command="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=RetryCommand}"
                             CommandParameter="{Binding}"
                             Icon="{x:Static ui:FluentSystemIcons.ArrowSync_20_Regular}"
-                            IconSize="{DynamicResource STControlFontSize10}"
+                            IconSize="{DynamicResource STControlFontSize12}"
                             ToolTip="{DynamicResource Retry}"
                             Visibility="{Binding Plugin.TransResult.IsSuccess, Converter={cnvt:BoolToVisibilityInverseConverter}}" />
+
+                        <Button
+                            Padding="5,3"
+                            FlowDirection="LeftToRight"
+                            Style="{StaticResource QuickSettingsButtonStyle}">
+                            <ui:FontIcon FontSize="{DynamicResource STControlFontSize18}" Icon="{x:Static ui:FluentSystemIcons.SettingsCogMultiple_20_Regular}" />
+                            <Button.Resources>
+                                <s:BindingProxy x:Key="SvcProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=Expander}, Path=DataContext}" />
+                                <s:BindingProxy x:Key="MainVmProxy" Data="{Binding RelativeSource={RelativeSource AncestorType=control:OutputControl}, Path=DataContext}" />
+                            </Button.Resources>
+                            <ui:FlyoutService.Flyout>
+                                <ui:MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.SingleTranslateCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource ExecuteTranslation}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_20_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="{DynamicResource TransExecMode}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.GlanceHorizontalSparkles_20_Regular}" />
+                                        </MenuItem.Icon>
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecAutomatic}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Automatic}" />
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecManual}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Manual}" />
+                                        <MenuItem
+                                            Header="{DynamicResource TransExecPinned}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.ExecMode, Converter={cnvt:ExecutionModeBoolConverter}, ConverterParameter=Pinned}" />
+                                    </MenuItem>
+                                    <MenuItem Header="{DynamicResource AutoBackTranslation}">
+                                        <MenuItem.Style>
+                                            <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                                                <Setter Property="Icon">
+                                                    <Setter.Value>
+                                                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Flash_20_Regular}" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation}" Value="True">
+                                                        <Setter Property="Icon">
+                                                            <Setter.Value>
+                                                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.FlashAuto_20_Regular}" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                        <MenuItem
+                                            Header="{DynamicResource On}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation}" />
+                                        <MenuItem
+                                            Header="{DynamicResource Off}"
+                                            IsCheckable="True"
+                                            IsChecked="{Binding Source={StaticResource SvcProxy}, Path=Data.Options.AutoBackTranslation, Converter={cnvt:BoolInverseConverter}}" />
+                                    </MenuItem>
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.NavigateCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource ConfigureService}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Settings_20_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem
+                                        Command="{Binding Source={StaticResource MainVmProxy}, Path=Data.CloseServiceCommand}"
+                                        CommandParameter="{Binding Source={StaticResource SvcProxy}, Path=Data}"
+                                        Header="{DynamicResource CloseService}">
+                                        <MenuItem.Icon>
+                                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.PictureInPictureExit_20_Regular}" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ui:MenuFlyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
                     </ikw:SimpleStackPanel>
                 </DockPanel>
             </Expander.Header>
