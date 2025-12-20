@@ -52,6 +52,11 @@ public partial class Settings : ObservableObject
 
     [ObservableProperty] public partial bool IsScreenshotTranslateInImageVisible { get; set; } = true;
 
+    /// <summary>
+    /// 截图时是否显示辅助线
+    /// </summary>
+    [ObservableProperty] public partial bool ShowScreenshotAuxiliaryLines { get; set; } = true;
+
     [ObservableProperty] public partial bool HideInput { get; set; } = false;
 
     [ObservableProperty] public partial bool HideInputWithLangSelectControl { get; set; } = false;

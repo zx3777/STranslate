@@ -62,6 +62,8 @@
     <sys:String x:Key="General_ScreenshotTranslateInImage">In-Image Translation</sys:String>
     <sys:String x:Key="General_ScreenshotTranslateInImageDescription">Whether to enable in-image translation during screenshot translation.</sys:String>
     <sys:String x:Key="General_ScreenshotTranslateInImageButtonVisible">Show the In-Image Translation button on the main interface.</sys:String>
+    <sys:String x:Key="General_ShowScreenshotAuxiliaryLines">Screenshot Auxiliary Lines</sys:String>
+    <sys:String x:Key="General_ShowScreenshotAuxiliaryLinesDescription">Whether to show auxiliary lines during screenshot to help select area more accurately.</sys:String>
     <sys:String x:Key="General_HideNotifyIcon">Hide NotifyIcon</sys:String>
     <sys:String x:Key="General_ShowScreenshotItemInNotifyIconMenu">Show Screenshot Translation in Tray Menu</sys:String>
     <sys:String x:Key="General_ShowOcrItemInNotifyIconMenu">Show Text Recognition in Tray Menu</sys:String>
