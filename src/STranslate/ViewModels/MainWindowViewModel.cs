@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Input;
 
 namespace STranslate.ViewModels;
 
@@ -1089,8 +1090,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
         MainWindow.Visibility = Visibility.Visible;
         UpdatePosition();
+
+        Win32Helper.SetForegroundWindow(MainWindow);
+
         MainWindow.Activate();
+
         MainWindow.PART_Input.Focus();
+        Keyboard.Focus(MainWindow.PART_Input);
     }
 
     public void Hide() => MainWindow.Visibility = Visibility.Collapsed;
