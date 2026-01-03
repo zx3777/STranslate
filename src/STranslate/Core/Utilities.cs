@@ -23,7 +23,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.System.Memory;
-using WindowsInput;#region MouseHookUtils
+using WindowsInput;
 
 namespace STranslate.Core;
 
