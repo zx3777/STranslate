@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:STranslate.ViewModels"
         mc:Ignorable="d"
         Title="STranslate Icon"
-        Height="18" Width="18"
+        Height="20" Width="20"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -25,27 +25,28 @@
 
     <Grid Background="Transparent">
         <Button x:Name="TranslateBtn"
-                Width="18" Height="18"
+                Width="20" Height="20"
                 Cursor="Hand"
                 Click="TranslateBtn_Click"
                 Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                Background="#F0FFFFFF"
+                Background="#D3D3D3"
                 BorderThickness="1"
-                BorderBrush="#30000000"
+                BorderBrush="#808080"
                 Padding="0">
             <Button.Resources>
                 <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="9"/>
+                    <Setter Property="CornerRadius" Value="3"/>
                 </Style>
             </Button.Resources>
             
-            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_16_Regular}"
-                         Foreground="Black"
-                         FontSize="10"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"/>
-            
-            <Button.ToolTip>
+            <TextBlock Text="文"
+                       Foreground="Black"
+                       FontSize="11"
+                       FontWeight="Normal"
+                       FontFamily="Microsoft YaHei"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Margin="0,-1,0,0"/> <Button.ToolTip>
                 <ToolTip Content="点击翻译" />
             </Button.ToolTip>
         </Button>
