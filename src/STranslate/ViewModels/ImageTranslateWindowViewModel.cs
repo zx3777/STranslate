@@ -256,7 +256,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
         }
     }
 
-    [RelayCommand]
+
     /// <summary>
     /// 针对 LLM 的批量翻译逻辑：打包 JSON -> 发送 -> 解析 -> 回填
     /// </summary>
@@ -297,7 +297,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             if (!result.IsSuccess || string.IsNullOrEmpty(result.Text))
             {
-                _logger.LogError($"批量翻译失败: {result.ErrorMessage}");
+                _logger.LogError($"批量翻译失败: {result.Exception?.Message ?? "Unknown Error"}");
                 _snackbar.ShowError(_i18n.GetTranslation("TranslateFail"));
                 return;
             }
@@ -342,7 +342,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             _snackbar.ShowError($"批量翻译错误: {ex.Message}");
         }
     }
-    
+    [RelayCommand]
     private async Task ReExecuteAsync()
     {
         if (_sourceImage == null || IsExecuting) return;
