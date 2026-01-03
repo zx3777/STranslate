@@ -204,15 +204,6 @@
                                 OffContent="{DynamicResource Hide}"
                                 OnContent="{DynamicResource Show}" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="划词后显示悬浮图标" Description="选中样本文本后显示小图标，点击图标才翻译">
-                            <ui:SettingsCard.HeaderIcon>
-                                <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorClick_20_Regular}" />
-                            </ui:SettingsCard.HeaderIcon>
-                            <ui:ToggleSwitch
-                                IsOn="{Binding Settings.ShowMouseHookIcon}"
-                                OffContent="{DynamicResource Disable}"
-                                OnContent="{DynamicResource Enable}" />
-                        </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
@@ -554,6 +545,16 @@
                         IsOn="{Binding Settings.IsMouseHookVisible}"
                         OffContent="{DynamicResource Hide}"
                         OnContent="{DynamicResource Show}" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="划词后显示悬浮图标" Description="选中样本文本后显示小图标，点击图标才翻译">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.CursorClick_20_Regular}" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ui:ToggleSwitch
+                        IsOn="{Binding Settings.ShowMouseHookIcon}"
+                        OffContent="{DynamicResource Disable}"
+                        OnContent="{DynamicResource Enable}" />
                 </ui:SettingsCard>
 
                 <ui:SettingsCard Description="{DynamicResource General_ShowHistoryNavigationDescription}" Header="{DynamicResource General_ShowHistoryNavigation}">
