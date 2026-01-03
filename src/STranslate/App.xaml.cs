@@ -129,6 +129,7 @@ public partial class App : ISingleInstanceApp, INavigation, IDisposable
                     services.AddTransient<SettingsWindowViewModel>();
                     services.AddTransient<OcrWindowViewModel>();
                     services.AddTransient<ImageTranslateWindowViewModel>();
+                    services.AddSingleton<MouseHookIconWindow>();
 
                     // 自动注册页面
                     services.AddScopedFromNamespace("STranslate.ViewModels.Pages", Assembly.GetExecutingAssembly());
