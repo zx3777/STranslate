@@ -76,6 +76,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         Settings = settings;
         HotkeySettings = hotkeySettings;
         _mouseHookIconWindow = mouseHookIconWindow;
+        _mouseHookIconWindow.DataContext = this;
 
         _i18n.OnLanguageChanged += OnLanguageChanged;
     }
