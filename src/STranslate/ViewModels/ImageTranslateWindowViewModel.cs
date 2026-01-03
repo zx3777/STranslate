@@ -1214,4 +1214,3 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
     #endregion
 }
-哪有啊
