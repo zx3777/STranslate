@@ -23,7 +23,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.System.Memory;
-using WindowsInput;
+using WindowsInput;#region MouseHookUtils
 
 namespace STranslate.Core;
 
@@ -553,19 +553,9 @@ public class Utilities
     /// </summary>
     public static bool IsAutomaticCopy { get; set; } = true;
 
-    /// <summary>
-    /// 鼠标划词文本选择事件 (自动取词模式下触发)
-    /// </summary>
     public static event Action<string>? MouseTextSelected;
-
-    /// <summary>
-    /// 鼠标划词结束事件 (非自动取词模式下触发，仅传递位置)
-    /// </summary>
     public static event Action<System.Drawing.Point>? MousePointSelected;
 
-    /// <summary>
-    /// 启动鼠标划词监听
-    /// </summary>
     public static async Task StartMouseTextSelectionAsync()
     {
         if (_isMouseListening) return;
@@ -575,13 +565,9 @@ public class Utilities
         _mouseHook.MouseDragFinished += OnDragFinished;
 
         _isMouseListening = true;
-
         await Task.Delay(100);
     }
 
-    /// <summary>
-    /// 停止鼠标划词监听
-    /// </summary>
     public static void StopMouseTextSelection()
     {
         if (!_isMouseListening) return;
@@ -609,9 +595,10 @@ public class Utilities
 
     private static void OnDragStarted(object? sender, System.Windows.Forms.MouseEventArgs e)
     {
-        // 只有自动模式才需要在开始时记录旧文本
         if (IsAutomaticCopy)
+        {
             _oldText = GetText() ?? string.Empty;
+        }
     }
 
     private static void OnDragFinished(object? sender, System.Windows.Forms.MouseEventArgs e)
@@ -620,7 +607,7 @@ public class Utilities
         {
             if (IsAutomaticCopy)
             {
-                // 原有逻辑：置顶模式下，直接复制取词
+                // 置顶模式：保持原样，直接复制
                 _ = Task.Run(async () =>
                 {
                     var selectedText = await GetSelectedTextAsync();
@@ -632,10 +619,62 @@ public class Utilities
             }
             else
             {
-                // 新逻辑：图标模式下，不复制，只通知位置
-                MousePointSelected?.Invoke(e.Location);
+                // ★★★ 核心修改：图标模式下，增加光标形状检测 ★★★
+                // 只有当光标是 "I-Beam" (文本输入/选择状) 时，才认为是选中文本
+                // 这样可以过滤掉桌面选文件、拖拽窗口等操作
+                if (IsIBeamCursor())
+                {
+                    MousePointSelected?.Invoke(e.Location);
+                }
             }
         }
+    }
+
+    // --- ↓↓↓ 新增：光标检测逻辑 ↓↓↓ ---
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CURSORINFO
+    {
+        public int cbSize;
+        public int flags;
+        public IntPtr hCursor;
+        public System.Drawing.Point ptScreenPos;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorInfo(ref CURSORINFO pci);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+
+    private const int IDC_IBEAM = 32513; // 系统标准的“工”字形文本选择光标 ID
+
+    /// <summary>
+    /// 判断当前鼠标光标是否为文本选择状态 (I-Beam)
+    /// </summary>
+    private static bool IsIBeamCursor()
+    {
+        try
+        {
+            var ci = new CURSORINFO();
+            ci.cbSize = Marshal.SizeOf(ci);
+            
+            if (GetCursorInfo(ref ci))
+            {
+                // 获取系统标准的 I-Beam 光标句柄
+                var hIBeam = LoadCursor(IntPtr.Zero, IDC_IBEAM);
+                
+                // 比较当前光标句柄是否等于系统 I-Beam 句柄
+                // 注意：某些自定义主题或个别软件(如Word)可能使用自定义光标，这可能会导致漏判，
+                // 但这是过滤桌面/文件选择最安全、无副作用的方法。
+                return ci.hCursor == hIBeam;
+            }
+        }
+        catch (Exception)
+        {
+            // 容错处理
+        }
+        return false;
     }
 
     #endregion
