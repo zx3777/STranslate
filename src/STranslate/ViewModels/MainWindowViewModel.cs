@@ -77,6 +77,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         HotkeySettings = hotkeySettings;
         _mouseHookIconWindow = mouseHookIconWindow;
         _mouseHookIconWindow.DataContext = this;
+        Utilities.MousePointSelected += OnMousePointSelected;
 
         _i18n.OnLanguageChanged += OnLanguageChanged;
     }
@@ -127,10 +128,19 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         get => field;
         set
         {
-            if (IsMouseHook && !value)
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("监听鼠标划词时窗口必须置顶", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-            else
-                SetProperty(ref field, value);
+            if (IsMouseHook && !value && !Settings.ShowMouseHookIcon)
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("监听鼠标划词且未开启图标模式时，窗口必须置顶", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            
+            SetProperty(ref field, value);
+            
+            // 更新 Utilities 的自动复制状态：置顶时自动复制，不置顶时手动复制
+            if (IsMouseHook)
+            {
+                Utilities.IsAutomaticCopy = value || !Settings.ShowMouseHookIcon;
+            }
         }
     }
 
@@ -986,24 +996,23 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         if (enable)
         {
-            // ★★★ 修改核心逻辑 ★★★
-            // 只有在“非图标模式”下，才强制显示主窗口和置顶
-            // 这样如果你只想要小图标，主窗口就可以保持隐藏或在后台运行
             if (!Settings.ShowMouseHookIcon)
             {
                 Show();
                 IsTopmost = true;
             }
 
+            // 设置 Utilities 模式：如果是置顶或者不显示图标，则自动复制；否则(后台+图标模式)不自动复制
+            Utilities.IsAutomaticCopy = IsTopmost || !Settings.ShowMouseHookIcon;
+
             await Utilities.StartMouseTextSelectionAsync();
-            Utilities.MouseTextSelected += OnMouseTextSelected;
+            Utilities.MouseTextSelected += OnMouseTextSelected; // 自动模式的回调
             
-            // 可选：给个提示确认已开启
-            _snackbar.ShowSuccess(Settings.ShowMouseHookIcon ? "已开启划词图标模式" : "已开启划词翻译");
+            var msg = Settings.ShowMouseHookIcon ? "已开启划词 (图标模式)" : "已开启划词 (置顶模式)";
+            _snackbar.ShowSuccess(msg);
         }
         else
         {
-            // 关闭时，只有非图标模式才需要取消置顶
             if (!Settings.ShowMouseHookIcon)
             {
                 IsTopmost = false;
@@ -1018,21 +1027,32 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            // 检查设置中是否开启了“显示划词图标”选项
-            if (Settings.ShowMouseHookIcon)
+            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+        });
+    }
+
+    // 新增：图标模式回调（只显示图标）
+    private void OnMousePointSelected(System.Drawing.Point drawingPoint)
+    {
+        _ = Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            var point = new Point(drawingPoint.X, drawingPoint.Y);
+            _mouseHookIconWindow.ShowAt(point);
+        });
+    }
+
+    public void ExecuteIconTranslate()
+    {
+        // 点击图标后，才真正执行复制和取词
+        _ = Task.Run(async () =>
+        {
+            var text = await Utilities.GetSelectedTextAsync();
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                // 获取当前鼠标位置 (使用 System.Windows.Forms 获取屏幕绝对坐标)
-                var drawingPoint = System.Windows.Forms.Cursor.Position;
-                // 转换为 WPF 的 Point 对象
-                var point = new Point(drawingPoint.X, drawingPoint.Y);
-                
-                // 调用图标窗口的显示方法
-                _mouseHookIconWindow.ShowAt(point, text);
-            }
-            else
-            {
-                // 如果未开启图标模式，保持原有的直接翻译逻辑
-                ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+                });
             }
         });
     }
@@ -1633,6 +1653,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         Utilities.MouseTextSelected -= OnMouseTextSelected;
+        Utilities.MousePointSelected -= OnMousePointSelected;
 
         // 如果窗口一直没打开过，恢复位置后再退出
         if (Settings.MainWindowLeft <= -18000 && Settings.MainWindowTop <= -18000)
