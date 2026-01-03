@@ -1195,7 +1195,6 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void Cancel(Window window)
-    private void Cancel(Window window)
     {
         // ★★★ 修改判断逻辑 ★★★
         // 原逻辑：if (!IsMouseHook) ...
