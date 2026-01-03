@@ -549,9 +549,19 @@ public class Utilities
     private static string _oldText = string.Empty;
 
     /// <summary>
-    /// 鼠标划词文本选择事件
+    /// 是否在划词结束时自动执行复制取词操作
+    /// </summary>
+    public static bool IsAutomaticCopy { get; set; } = true;
+
+    /// <summary>
+    /// 鼠标划词文本选择事件 (自动取词模式下触发)
     /// </summary>
     public static event Action<string>? MouseTextSelected;
+
+    /// <summary>
+    /// 鼠标划词结束事件 (非自动取词模式下触发，仅传递位置)
+    /// </summary>
+    public static event Action<System.Drawing.Point>? MousePointSelected;
 
     /// <summary>
     /// 启动鼠标划词监听
@@ -566,7 +576,6 @@ public class Utilities
 
         _isMouseListening = true;
 
-        // 等待钩子启动
         await Task.Delay(100);
     }
 
@@ -588,43 +597,44 @@ public class Utilities
         }
     }
 
-    /// <summary>
-    /// 切换鼠标划词监听状态
-    /// </summary>
     public static async Task ToggleMouseTextSelection()
     {
         if (_isMouseListening)
-        {
             StopMouseTextSelection();
-        }
         else
-        {
             await StartMouseTextSelectionAsync();
-        }
     }
 
-    /// <summary>
-    /// 获取鼠标划词监听状态
-    /// </summary>
     public static bool IsMouseTextSelectionListening => _isMouseListening;
 
     private static void OnDragStarted(object? sender, System.Windows.Forms.MouseEventArgs e)
-        => _oldText = GetText() ?? string.Empty;
+    {
+        // 只有自动模式才需要在开始时记录旧文本
+        if (IsAutomaticCopy)
+            _oldText = GetText() ?? string.Empty;
+    }
 
     private static void OnDragFinished(object? sender, System.Windows.Forms.MouseEventArgs e)
     {
         if (e.Button == System.Windows.Forms.MouseButtons.Left)
         {
-            // 异步处理文本获取和事件触发
-            _ = Task.Run(async () =>
+            if (IsAutomaticCopy)
             {
-                // 异步获取选中文本
-                var selectedText = await GetSelectedTextAsync();
-                if (!string.IsNullOrEmpty(selectedText) && selectedText != _oldText)
+                // 原有逻辑：置顶模式下，直接复制取词
+                _ = Task.Run(async () =>
                 {
-                    MouseTextSelected?.Invoke(selectedText);
-                }
-            });
+                    var selectedText = await GetSelectedTextAsync();
+                    if (!string.IsNullOrEmpty(selectedText) && selectedText != _oldText)
+                    {
+                        MouseTextSelected?.Invoke(selectedText);
+                    }
+                });
+            }
+            else
+            {
+                // 新逻辑：图标模式下，不复制，只通知位置
+                MousePointSelected?.Invoke(e.Location);
+            }
         }
     }
 
