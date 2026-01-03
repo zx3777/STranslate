@@ -7,15 +7,12 @@ namespace STranslate.Views;
 
 public partial class MouseHookIconWindow : Window
 {
-    private readonly MainWindowViewModel _vm;
     private string _currentText = "";
     private readonly DispatcherTimer _hideTimer;
 
-    public MouseHookIconWindow(MainWindowViewModel vm)
+    public MouseHookIconWindow()
     {
         InitializeComponent();
-        _vm = vm;
-        this.DataContext = vm;
 
         // 初始化自动隐藏定时器（例如3秒后自动消失）
         _hideTimer = new DispatcherTimer
@@ -61,6 +58,9 @@ public partial class MouseHookIconWindow : Window
     {
         HideWindow();
         // 执行翻译
-        _vm.ExecuteTranslate(Utilities.LinebreakHandler(_currentText, _vm.Settings.LineBreakHandleType));
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.ExecuteTranslate(Utilities.LinebreakHandler(_currentText, vm.Settings.LineBreakHandleType));
+        }
     }
 }
