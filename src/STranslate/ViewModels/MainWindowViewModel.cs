@@ -980,18 +980,35 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ToggleMouseHookTranslate() => IsMouseHook = !IsMouseHook;
 
+    // src/STranslate/ViewModels/MainWindowViewModel.cs
+
     private async Task ToggleMouseHookAsync(bool enable)
     {
         if (enable)
         {
-            Show();
-            IsTopmost = true;
+            // ★★★ 修改核心逻辑 ★★★
+            // 只有在“非图标模式”下，才强制显示主窗口和置顶
+            // 这样如果你只想要小图标，主窗口就可以保持隐藏或在后台运行
+            if (!Settings.ShowMouseHookIcon)
+            {
+                Show();
+                IsTopmost = true;
+            }
+
             await Utilities.StartMouseTextSelectionAsync();
             Utilities.MouseTextSelected += OnMouseTextSelected;
+            
+            // 可选：给个提示确认已开启
+            _snackbar.ShowSuccess(Settings.ShowMouseHookIcon ? "已开启划词图标模式" : "已开启划词翻译");
         }
         else
         {
-            IsTopmost = false;
+            // 关闭时，只有非图标模式才需要取消置顶
+            if (!Settings.ShowMouseHookIcon)
+            {
+                IsTopmost = false;
+            }
+            
             Utilities.StopMouseTextSelection();
             Utilities.MouseTextSelected -= OnMouseTextSelected;
         }
@@ -1178,8 +1195,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     [RelayCommand]
     private void Cancel(Window window)
+    private void Cancel(Window window)
     {
-        if (!IsMouseHook)
+        // ★★★ 修改判断逻辑 ★★★
+        // 原逻辑：if (!IsMouseHook) ...
+        // 新逻辑：如果 (没有开启划词) 或者 (开启了划词 且 是图标模式) -> 允许隐藏窗口
+        // 这样你就可以放心地把主窗口关掉（最小化到托盘），划词功能依然在后台工作
+        if (!IsMouseHook || (IsMouseHook && Settings.ShowMouseHookIcon))
         {
             if (IsTopmost) IsTopmost = false;
             window.Visibility = Visibility.Collapsed;
