@@ -23,6 +23,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
+// 在文件头部原本的 using 列表下方添加：
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.RegularExpressions; // 用于清洗 AI 返回的 markdown 标记
 
 namespace STranslate.ViewModels;
 
@@ -199,22 +203,37 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             ProcessRingText = _i18n.GetTranslation("TranslatingText");
 
-            await Parallel.ForEachAsync(_lastOcrResult.OcrContents, cancellationToken, async (content, cancellationToken) =>
-            {
-                var (isSuccess, source, target) = await LanguageDetector.GetLanguageAsync(content.Text, cancellationToken).ConfigureAwait(false);
-                if (!isSuccess)
-                {
-                    _logger.LogWarning($"Language detection failed for text: {content.Text}");
-                    _notification.Show(_i18n.GetTranslation("Prompt"), "语言检测失败");
-                    return;
-                }
-                if (string.IsNullOrWhiteSpace(content.Text))
-                    return;
+            // 筛选出有效内容的索引和文本（避免处理空行）
+            var validItems = _lastOcrResult.OcrContents
+                .Select((c, i) => new { Content = c, Index = i })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Content.Text))
+                .ToList();
 
-                var result = new TranslateResult();
-                await tranSvc.TranslateAsync(new TranslateRequest(content.Text, source, target), result, cancellationToken);
-                content.Text = result.IsSuccess ? result.Text : content.Text;
-            });
+            if (validItems.Count > 0)
+            {
+                // 策略分支：判断是否为大模型 (ILlm 接口)
+                // 大模型使用 JSON 批处理，普通接口维持原有并发逻辑
+                if (tranSvc is ILlm)
+                {
+                    await ExecuteBatchLlmTranslationAsync(tranSvc, validItems.Select(x => x.Content).ToList(), cancellationToken);
+                }
+                else
+                {
+                    // 非大模型（如 Google/Baidu）继续使用并发逐个翻译
+                    await Parallel.ForEachAsync(validItems, cancellationToken, async (item, token) =>
+                    {
+                        var content = item.Content;
+                        var (isSuccess, source, target) = await LanguageDetector.GetLanguageAsync(content.Text, token).ConfigureAwait(false);
+                        
+                        if (!isSuccess || string.IsNullOrWhiteSpace(content.Text)) return;
+
+                        var result = new TranslateResult();
+                        await tranSvc.TranslateAsync(new TranslateRequest(content.Text, source, target), result, token);
+                        
+                        if (result.IsSuccess) content.Text = result.Text;
+                    });
+                }
+            }
 
             // 生成翻译结果图像（在原图上覆盖翻译文本）
             _resultImage = GenerateTranslatedImage(_lastOcrResult, Utilities.ToBitmapImage(bitmap, Settings.GetImageFormat()));
@@ -238,6 +257,92 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
     }
 
     [RelayCommand]
+    /// <summary>
+    /// 针对 LLM 的批量翻译逻辑：打包 JSON -> 发送 -> 解析 -> 回填
+    /// </summary>
+    private async Task ExecuteBatchLlmTranslationAsync(ITranslatePlugin tranSvc, List<OcrContent> contents, CancellationToken token)
+    {
+        try
+        {
+            // 1. 提取原文并序列化为 JSON
+            var sourceTexts = contents.Select(c => c.Text).ToList();
+            var jsonOption = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            var jsonString = JsonSerializer.Serialize(sourceTexts, jsonOption);
+
+            // 2. 构造 Prompt
+            // 注意：这里强制要求 AI 返回纯 JSON 数组
+            var prompt = $@"你是一个专业的翻译引擎。请将传入的 JSON 数组中的每一个字符串翻译成目标语言，并严格按照 JSON 数组格式返回。
+
+要求：
+1. 保持数组长度不变，与输入一一对应。
+2. 只需要返回翻译后的 JSON 数组，严禁包含任何解释、Markdown 标记（如 ```json）或额外的文字。
+3. 翻译风格要简洁、准确。
+
+输入内容：
+{jsonString}";
+
+            // 3. 确定源语言和目标语言 (取第一句进行检测，或者默认为 Auto -> 用户设置的目标语)
+            var firstText = sourceTexts.FirstOrDefault() ?? "";
+            var (isSuccess, sourceLang, targetLang) = await LanguageDetector.GetLanguageAsync(firstText, token);
+            // 如果检测失败，默认使用 Auto
+            if (!isSuccess) sourceLang = LangEnum.Auto;
+            
+            // 确保目标语言正确 (通常是从 Settings 读取，这里 LanguageDetector 会返回推荐的目标语)
+            // 你也可以强制指定: targetLang = Settings.TargetLang;
+
+            // 4. 发送请求
+            var result = new TranslateResult();
+            // 将整个 Prompt 当作 InputText 发送
+            await tranSvc.TranslateAsync(new TranslateRequest(prompt, sourceLang, targetLang), result, token);
+
+            if (!result.IsSuccess || string.IsNullOrEmpty(result.Text))
+            {
+                _logger.LogError($"批量翻译失败: {result.ErrorMessage}");
+                _snackbar.ShowError(_i18n.GetTranslation("TranslateFail"));
+                return;
+            }
+
+            // 5. 清洗 AI 返回的数据 (去除可能的 Markdown 代码块)
+            var responseText = result.Text.Trim();
+            // 移除 ```json 和 ``` 包裹
+            responseText = Regex.Replace(responseText, @"^```json\s*", "", RegexOptions.IgnoreCase);
+            responseText = Regex.Replace(responseText, @"^```\s*", "", RegexOptions.IgnoreCase);
+            responseText = Regex.Replace(responseText, @"\s*```$", "", RegexOptions.IgnoreCase);
+            responseText = responseText.Trim();
+
+            // 6. 反序列化并回填
+            try
+            {
+                var translatedTexts = JsonSerializer.Deserialize<List<string>>(responseText);
+
+                if (translatedTexts != null && translatedTexts.Count == contents.Count)
+                {
+                    for (int i = 0; i < contents.Count; i++)
+                    {
+                        contents[i].Text = translatedTexts[i];
+                    }
+                }
+                else
+                {
+                    // 数量不匹配时的降级处理：尝试按行分割（备选方案）
+                    _logger.LogWarning("AI 返回的 JSON 数组长度与输入不一致，尝试降级处理。");
+                    // 此时可能因为 AI 合并了句子，暂时保持原文或做其他提示
+                    _snackbar.ShowWarning("翻译结果数量不匹配，部分内容可能未翻译。");
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, $"JSON 解析失败。AI 返回内容: {responseText}");
+                _snackbar.ShowError("翻译结果格式解析失败，请重试。");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "批量翻译执行异常");
+            _snackbar.ShowError($"批量翻译错误: {ex.Message}");
+        }
+    }
+    
     private async Task ReExecuteAsync()
     {
         if (_sourceImage == null || IsExecuting) return;
