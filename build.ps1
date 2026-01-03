@@ -9,9 +9,20 @@ function Log([string]$msg, [string]$color = "Yellow") {
     Write-Host $msg -ForegroundColor $color
 }
 
-# 去除版本号中的 'v' 前缀(如果存在)
+# 1. 清理版本号 (移除 'v' 前缀) -> 得到完整版本 (例如: 2.0.4-Image4AI)
 $CleanVersion = $Version -replace '^v', ''
-Log "开始构建 STranslate 版本: $CleanVersion" "Green"
+
+# 2. 提取纯数字版本号 (用于 AssemblyVersion) -> (例如: 2.0.4)
+# 匹配开头的数字部分，忽略横杠后面的内容
+if ($CleanVersion -match "^(\d+(\.\d+){0,3})") {
+    $NumericVersion = $matches[1]
+} else {
+    $NumericVersion = "1.0.0.0" # 兜底
+}
+
+Log "构建信息:" "Cyan"
+Log "  完整版本 (Tag/Display): $CleanVersion" "Cyan"
+Log "  数字版本 (Assembly):    $NumericVersion" "Cyan"
 
 # 更新./src/SolutionAssemblyInfo.cs 中的版本号
 $asmInfo = "./src/SolutionAssemblyInfo.cs"
@@ -20,23 +31,24 @@ if (Test-Path $asmInfo) {
     # 读取文件内容
     $content = Get-Content $asmInfo -Raw
 
-    # 需要替换的行 —— 直接按正则匹配三种属性
+    # 定义替换规则
+    # AssemblyVersion 和 AssemblyFileVersion 必须用纯数字 ($NumericVersion)
+    # AssemblyInformationalVersion 可以用带后缀的完整版本 ($CleanVersion)
     $patterns = @{
-        'AssemblyVersion'              = 'AssemblyVersion\("[^"]+"\)'
-        'AssemblyFileVersion'          = 'AssemblyFileVersion\("[^"]+"\)'
-        'AssemblyInformationalVersion' = 'AssemblyInformationalVersion\("[^"]+"\)'
+        'AssemblyVersion'              = @{ Pattern = 'AssemblyVersion\("[^"]+"\)'; Value = "AssemblyVersion(`"$NumericVersion`")" }
+        'AssemblyFileVersion'          = @{ Pattern = 'AssemblyFileVersion\("[^"]+"\)'; Value = "AssemblyFileVersion(`"$NumericVersion`")" }
+        'AssemblyInformationalVersion' = @{ Pattern = 'AssemblyInformationalVersion\("[^"]+"\)'; Value = "AssemblyInformationalVersion(`"$CleanVersion`")" }
     }
 
     foreach ($key in $patterns.Keys) {
-        $pattern = $patterns[$key]
-        $replacement = "$key(`"$CleanVersion`")"
-        $content = [regex]::Replace($content, $pattern, $replacement)
+        $item = $patterns[$key]
+        $content = [regex]::Replace($content, $item.Pattern, $item.Value)
     }
 
     # 写回文件
     Set-Content $asmInfo $content -Encoding UTF8
 
-    Log "SolutionAssemblyInfo.cs 已更新为版本: $CleanVersion" "Green"
+    Log "SolutionAssemblyInfo.cs 已更新。" "Green"
 }
 else {
     Log "未找到 $asmInfo，无法执行版本写入。" "Red"
@@ -66,12 +78,16 @@ if (Test-Path $src) {
 }
 
 # 构建解决方案
+# 注意：这里传递给 MSBuild 的属性也需要区分
+# Version/PackageVersion 依然可以使用完整版
+# FileVersion/AssemblyVersion 最好使用数字版(虽然 .NET SDK 会自动处理，但为了保险起见)
 Log "正在重新生成解决方案..."
 dotnet build .\src\STranslate.sln `
   --configuration Release `
   --no-incremental `
   /p:Version=$CleanVersion `
-  /p:PackageVersion=$CleanVersion `
+  /p:AssemblyVersion=$NumericVersion `
+  /p:FileVersion=$NumericVersion `
   /p:InformationalVersion=$CleanVersion
 
 
