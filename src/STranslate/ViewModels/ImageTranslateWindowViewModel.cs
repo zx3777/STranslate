@@ -190,7 +190,7 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             //var originalAnnotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
 
             // 版面分析
-            ApplyLayoutAnalysis(_lastOcrResult);
+            // ApplyLayoutAnalysis(_lastOcrResult);
 
             // 生成版面分析后的标注图像（显示合并后的边框）
             _annotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
