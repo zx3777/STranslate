@@ -186,24 +186,30 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             IsNoLocationInfoVisible = !Utilities.HasBoxPoints(_lastOcrResult);
 
-            // 生成原始OCR标注图像（显示识别边框）
-            //var originalAnnotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
+            // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 修改开始：顺序调整与条件判断 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼
 
-            // 版面分析
-            // ApplyLayoutAnalysis(_lastOcrResult);
-
-            // 生成版面分析后的标注图像（显示合并后的边框）
-            _annotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
-
+            // 1. 【提前】获取翻译服务实例（原本这段在后面，现在提到版面分析之前）
+            // 这样我们要先知道是谁在翻译，才能决定要不要合并版面
             if (_translateService.ImageTranslateService?.Plugin is not ITranslatePlugin tranSvc)
             {
                 _snackbar.ShowWarning(_i18n.GetTranslation("NoTranslateService"));
                 return;
             }
 
+            // 2. 【智能判断】只有“非大模型（传统翻译）”才执行版面合并
+            //    - 传统翻译 (Google/DeepL)：执行合并，保证句子连贯，否则翻译碎成渣。
+            //    - 大模型 (ILlm)：跳过合并，保持OCR原始分块的精准位置，靠 Prompt 解决上下文。
+            if (tranSvc is not ILlm)
+            {
+                ApplyLayoutAnalysis(_lastOcrResult);
+            }
+
+            // 3. 生成标注图像 (这一步必须放在版面分析逻辑之后，以反映最终的分块情况)
+            _annotatedImage = GenerateAnnotatedImage(_lastOcrResult, _sourceImage);
+
             ProcessRingText = _i18n.GetTranslation("TranslatingText");
 
-            // 筛选出有效内容的索引和文本（避免处理空行）
+            // 4. 准备翻译内容
             var validItems = _lastOcrResult.OcrContents
                 .Select((c, i) => new { Content = c, Index = i })
                 .Where(x => !string.IsNullOrWhiteSpace(x.Content.Text))
@@ -211,15 +217,15 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
 
             if (validItems.Count > 0)
             {
-                // 策略分支：判断是否为大模型 (ILlm 接口)
-                // 大模型使用 JSON 批处理，普通接口维持原有并发逻辑
+                // 策略分支
                 if (tranSvc is ILlm)
                 {
+                    // 大模型：一次性打包发送 (配合之前写的 ExecuteBatchLlmTranslationAsync)
                     await ExecuteBatchLlmTranslationAsync(tranSvc, validItems.Select(x => x.Content).ToList(), cancellationToken);
                 }
                 else
                 {
-                    // 非大模型（如 Google/Baidu）继续使用并发逐个翻译
+                    // 传统翻译：并发发送 (此时内容已经被 ApplyLayoutAnalysis 合并过了，数量较少)
                     await Parallel.ForEachAsync(validItems, cancellationToken, async (item, token) =>
                     {
                         var content = item.Content;
@@ -234,6 +240,8 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
                     });
                 }
             }
+
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 修改结束 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
             // 生成翻译结果图像（在原图上覆盖翻译文本）
             _resultImage = GenerateTranslatedImage(_lastOcrResult, Utilities.ToBitmapImage(bitmap, Settings.GetImageFormat()));
@@ -270,12 +278,13 @@ public partial class ImageTranslateWindowViewModel : ObservableObject, IDisposab
             var jsonString = JsonSerializer.Serialize(sourceTexts, jsonOption);
 
             // 2. 构造 Prompt
-            var prompt = $@"你是一个专业的翻译引擎。请将传入的 JSON 数组中的每一个字符串翻译成目标语言，并严格按照 JSON 数组格式返回。
+            var prompt = $@"你是一个专业的翻译引擎。输入的是一个 OCR 识别结果的文本序列（JSON 数组）。
+请将数组中的每一个字符串翻译成目标语言，并严格按照 JSON 数组格式返回。
 
-要求：
-1. 保持数组长度不变，与输入一一对应。
-2. 只需要返回翻译后的 JSON 数组，严禁包含任何解释、Markdown 标记（如 ```json）或额外的文字。
-3. 翻译风格要简洁、准确。
+重要要求：
+1. **上下文连贯**：输入中的文本可能是被强制换行切断的句子。请务必结合上下文理解完整语意，不要逐行死译。
+2. **一一对应**：尽管你需要结合上下文翻译，但返回的数组长度必须与输入完全一致。请将翻译后的内容合理分配回对应的位置。
+3. **格式严格**：严禁包含任何 Markdown 标记（如 ```json），只返回纯 JSON 数组。
 
 输入内容：
 {jsonString}";
