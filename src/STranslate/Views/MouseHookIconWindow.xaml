@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:vm="clr-namespace:STranslate.ViewModels"
         mc:Ignorable="d"
         Title="STranslate Icon"
         Height="20" Width="20"
@@ -16,7 +15,8 @@
         ResizeMode="NoResize"
         ShowActivated="False"
         SizeToContent="Manual"
-        UseLayoutRounding="True"> <Window.Resources>
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"> <Window.Resources>
         <Storyboard x:Key="FadeIn">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
         </Storyboard>
@@ -27,28 +27,39 @@
                 Width="20" Height="20"
                 Cursor="Hand"
                 Click="TranslateBtn_Click"
-                Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
                 Background="#D3D3D3"
-                BorderThickness="1"
                 BorderBrush="#808080"
-                Padding="0,0,0,1"> <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="3"/>
-                </Style>
-            </Button.Resources>
+                BorderThickness="1">
             
-            <TextBlock Text="文"
-                       Foreground="Black"
-                       FontSize="5"
-                       FontWeight="Normal"
-                       FontFamily="Microsoft YaHei UI"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextOptions.TextFormattingMode="Display" 
-                       TextOptions.TextRenderingMode="ClearType"/> 
             <Button.ToolTip>
                 <ToolTip Content="点击翻译" />
             </Button.ToolTip>
+
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3">
+                        
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Ellipse Width="10" Height="10" 
+                                     Stroke="Black" 
+                                     StrokeThickness="1.5"/>
+                            
+                            <Ellipse Width="4" Height="4" 
+                                     Fill="Black"/>
+                        </Grid>
+                        
+                    </Border>
+                    
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FFFFFF"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
         </Button>
     </Grid>
 </Window>
