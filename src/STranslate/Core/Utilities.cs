@@ -607,7 +607,7 @@ public class Utilities
         {
             if (IsAutomaticCopy)
             {
-                // 置顶模式：保持原样，直接复制
+                // ... (置顶模式代码保持不变) ...
                 _ = Task.Run(async () =>
                 {
                     var selectedText = await GetSelectedTextAsync();
@@ -619,10 +619,9 @@ public class Utilities
             }
             else
             {
-                // ★★★ 核心修改：图标模式下，增加光标形状检测 ★★★
-                // 只有当光标是 "I-Beam" (文本输入/选择状) 时，才认为是选中文本
-                // 这样可以过滤掉桌面选文件、拖拽窗口等操作
-                if (IsIBeamCursor())
+                // ★★★ 修改调用处 ★★★
+                // 支持 文本光标(IBEAM) 和 手型光标(HAND)
+                if (IsValidCursor())
                 {
                     MousePointSelected?.Invoke(e.Location);
                 }
@@ -647,12 +646,13 @@ public class Utilities
     [DllImport("user32.dll")]
     private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
 
-    private const int IDC_IBEAM = 32513; // 系统标准的“工”字形文本选择光标 ID
+    private const int IDC_IBEAM = 32513; // 文本选择光标
+    private const int IDC_HAND = 32649;  // 手型光标 (链接/按钮)
 
     /// <summary>
-    /// 判断当前鼠标光标是否为文本选择状态 (I-Beam)
+    /// 判断当前鼠标光标是否为有效的文本选择状态 (I-Beam 或 Hand)
     /// </summary>
-    private static bool IsIBeamCursor()
+    private static bool IsValidCursor()
     {
         try
         {
@@ -661,13 +661,12 @@ public class Utilities
             
             if (GetCursorInfo(ref ci))
             {
-                // 获取系统标准的 I-Beam 光标句柄
+                // 获取系统标准光标句柄
                 var hIBeam = LoadCursor(IntPtr.Zero, IDC_IBEAM);
+                var hHand = LoadCursor(IntPtr.Zero, IDC_HAND);
                 
-                // 比较当前光标句柄是否等于系统 I-Beam 句柄
-                // 注意：某些自定义主题或个别软件(如Word)可能使用自定义光标，这可能会导致漏判，
-                // 但这是过滤桌面/文件选择最安全、无副作用的方法。
-                return ci.hCursor == hIBeam;
+                // 只要是“工字形”或者“小手”，都认为是想选中文本
+                return ci.hCursor == hIBeam || ci.hCursor == hHand;
             }
         }
         catch (Exception)
