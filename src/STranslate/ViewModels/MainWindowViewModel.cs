@@ -29,6 +29,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly IScreenshot _screenshot;
     private readonly ISnackbar _snackbar;
     private readonly INotification _notification;
+    private readonly MouseHookIconWindow _mouseHookIconWindow;
     private double _cacheLeft;
     private double _cacheTop;
 
@@ -56,7 +57,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         VocabularyService vocabularyService,
         SqlService sqlService,
         Settings settings,
-        HotkeySettings hotkeySettings)
+        HotkeySettings hotkeySettings,
+        // ↓↓↓↓↓ 新增参数 ↓↓↓↓↓
+        MouseHookIconWindow mouseHookIconWindow)
     {
         DataProvider = dataProvider;
         _logger = logger;
@@ -72,6 +75,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _sqlService = sqlService;
         Settings = settings;
         HotkeySettings = hotkeySettings;
+        _mouseHookIconWindow = mouseHookIconWindow;
 
         _i18n.OnLanguageChanged += OnLanguageChanged;
     }
@@ -996,7 +1000,22 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
         _ = Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            // 检查设置中是否开启了“显示划词图标”选项
+            if (Settings.ShowMouseHookIcon)
+            {
+                // 获取当前鼠标位置 (使用 System.Windows.Forms 获取屏幕绝对坐标)
+                var drawingPoint = System.Windows.Forms.Cursor.Position;
+                // 转换为 WPF 的 Point 对象
+                var point = new Point(drawingPoint.X, drawingPoint.Y);
+                
+                // 调用图标窗口的显示方法
+                _mouseHookIconWindow.ShowAt(point, text);
+            }
+            else
+            {
+                // 如果未开启图标模式，保持原有的直接翻译逻辑
+                ExecuteTranslate(Utilities.LinebreakHandler(text, Settings.LineBreakHandleType));
+            }
         });
     }
 
