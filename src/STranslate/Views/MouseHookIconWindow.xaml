@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:STranslate.ViewModels"
         mc:Ignorable="d"
         Title="STranslate Icon"
-        Height="40" Width="40"
+        Height="18" Width="18"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -14,8 +15,8 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         ShowActivated="False"
-        SizeToContent="WidthAndHeight">
-    
+        SizeToContent="Manual">
+
     <Window.Resources>
         <Storyboard x:Key="FadeIn">
             <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
@@ -24,18 +25,26 @@
 
     <Grid Background="Transparent">
         <Button x:Name="TranslateBtn"
-                Width="32" Height="32"
+                Width="18" Height="18"
                 Cursor="Hand"
                 Click="TranslateBtn_Click"
                 Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                BorderThickness="0">
+                Background="#F0FFFFFF"
+                BorderThickness="1"
+                BorderBrush="#30000000"
+                Padding="0">
             <Button.Resources>
                 <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="16"/>
+                    <Setter Property="CornerRadius" Value="9"/>
                 </Style>
             </Button.Resources>
-            <Image Source="{Binding TrayIcon}" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality"/>
+            
+            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Translate_16_Regular}"
+                         Foreground="Black"
+                         FontSize="10"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"/>
+            
             <Button.ToolTip>
                 <ToolTip Content="点击翻译" />
             </Button.ToolTip>
