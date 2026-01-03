@@ -207,6 +207,73 @@
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
 
+                <ui:SettingsExpander Header="版面分析设置" Description="调整 OCR 结果的合并策略与阈值">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.TextboxAlignTopLeft_20_Regular}" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    
+                    <ComboBox
+                        MinWidth="150"
+                        DisplayMemberPath="Display"
+                        SelectedValuePath="Value"
+                        ItemsSource="{Binding DataProvider.LayoutAnalysisModes}"
+                        SelectedValue="{Binding Settings.LayoutAnalysisMode}" />
+
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="垂直合并阈值 (Vertical)" Description="控制上下相邻文本块的合并敏感度 (越小越严格)">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Slider
+                                    Width="150"
+                                    Maximum="2.0"
+                                    Minimum="0.0"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding Settings.VerticalThresholdRatio}" />
+                                <TextBlock Text="{Binding Settings.VerticalThresholdRatio, StringFormat={}{0:F1}}" VerticalAlignment="Center" Width="30"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="水平合并阈值 (Horizontal)" Description="控制左右相邻文本块的合并敏感度 (越小越严格)">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Slider
+                                    Width="150"
+                                    Maximum="2.0"
+                                    Minimum="0.0"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding Settings.HorizontalThresholdRatio}" />
+                                <TextBlock Text="{Binding Settings.HorizontalThresholdRatio, StringFormat={}{0:F1}}" VerticalAlignment="Center" Width="30"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard Header="换行阈值 (Line Spacing)" Description="判断是否换行的距离阈值">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Slider
+                                    Width="150"
+                                    Maximum="1.0"
+                                    Minimum="0.0"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding Settings.LineSpacingThresholdRatio}" />
+                                <TextBlock Text="{Binding Settings.LineSpacingThresholdRatio, StringFormat={}{0:F1}}" VerticalAlignment="Center" Width="30"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                        
+                        <ui:SettingsCard Header="词间距阈值 (Word Spacing)" Description="判断是否添加空格的距离阈值">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                <Slider
+                                    Width="150"
+                                    Maximum="1.0"
+                                    Minimum="0.0"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding Settings.WordSpacingThresholdRatio}" />
+                                <TextBlock Text="{Binding Settings.WordSpacingThresholdRatio, StringFormat={}{0:F1}}" VerticalAlignment="Center" Width="30"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
                 <ui:SettingsCard Header="{DynamicResource General_HistoryCount}">
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.History_20_Regular}" />
