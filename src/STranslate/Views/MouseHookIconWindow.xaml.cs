@@ -1,5 +1,4 @@
 using STranslate.ViewModels;
-using STranslate.Core;
 using System;
 using System.Windows;
 using System.Windows.Media;
@@ -9,7 +8,6 @@ namespace STranslate.Views;
 
 public partial class MouseHookIconWindow : Window
 {
-    private string _currentText = "";
     private readonly DispatcherTimer _hideTimer;
 
     public MouseHookIconWindow()
@@ -29,14 +27,11 @@ public partial class MouseHookIconWindow : Window
     }
 
     /// <summary>
-    /// 在指定位置显示图标
+    /// 仅显示图标，不传递文本
     /// </summary>
     /// <param name="point">鼠标的物理屏幕坐标</param>
-    /// <param name="text">选中的文本</param>
-    public void ShowAt(Point point, string text)
+    public void ShowAt(Point point)
     {
-        _currentText = text;
-
         // ★★★ 核心修复：获取当前屏幕的 DPI 缩放比例 ★★★
         var dpiScale = VisualTreeHelper.GetDpi(this);
         // 如果当前窗口未显示，可能获取不到 DPI，尝试获取主窗口的 DPI 作为后备
@@ -81,11 +76,11 @@ public partial class MouseHookIconWindow : Window
     {
         HideWindow();
         
-        // 通过 DataContext 获取 ViewModel 来执行翻译命令
-        // DataContext 是在 MainWindowViewModel 初始化时赋值的
+        // 点击后，调用 ViewModel 的新方法执行“复制+翻译”
+        // 注意：ExecuteIconTranslate 是下一步在 MainWindowViewModel 中新增的方法
         if (DataContext is MainWindowViewModel vm)
         {
-            vm.ExecuteTranslate(Utilities.LinebreakHandler(_currentText, vm.Settings.LineBreakHandleType));
+            vm.ExecuteIconTranslate();
         }
     }
 }
