@@ -78,6 +78,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _mouseHookIconWindow = mouseHookIconWindow;
         _mouseHookIconWindow.DataContext = this;
         Utilities.MousePointSelected += OnMousePointSelected;
+        Application.Current.Dispatcher.InvokeAsync(() => IsMouseHook = true);
 
         _i18n.OnLanguageChanged += OnLanguageChanged;
     }
@@ -110,7 +111,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public partial string TrayToolTip { get; set; } = Constant.AppName;
 
     [ObservableProperty]
-    public partial bool IsMouseHook { get; set; } = true;
+    public partial bool IsMouseHook { get; set; } = false;
 
     [ObservableProperty]
     public partial bool IsIdentifyProcessing { get; set; } = false;
