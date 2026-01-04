@@ -110,7 +110,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public partial string TrayToolTip { get; set; } = Constant.AppName;
 
     [ObservableProperty]
-    public partial bool IsMouseHook { get; set; } = false;
+    public partial bool IsMouseHook { get; set; } = true;
 
     [ObservableProperty]
     public partial bool IsIdentifyProcessing { get; set; } = false;
