@@ -547,6 +547,7 @@ public class Utilities
     private static IKeyboardMouseEvents? _mouseHook;
     private static bool _isMouseListening;
     private static string _oldText = string.Empty;
+    private static bool _isIBeamAtStart;
 
     /// <summary>
     /// 是否在划词结束时自动执行复制取词操作
@@ -609,6 +610,7 @@ public class Utilities
 
     private static void OnDragStarted(object? sender, System.Windows.Forms.MouseEventArgs e)
     {
+        _isIBeamAtStart = IsIBeamCursor();
         // 只有自动模式才需要在开始时记录旧文本
         if (IsAutomaticCopy)
             _oldText = GetText() ?? string.Empty;
@@ -634,7 +636,7 @@ public class Utilities
                 // ★★★ 核心修改：图标模式下，增加光标形状检测 ★★★
                 // 只有当光标是 "I-Beam" (文本输入/选择状) 时，才认为是选中文本
                 // 这样可以过滤掉桌面选文件、拖拽窗口等操作
-                if (IsIBeamCursor())
+                if (IsIBeamCursor() || _isIBeamAtStart)
                 {
                     MousePointSelected?.Invoke(e.Location);
                 }
