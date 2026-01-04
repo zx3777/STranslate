@@ -78,8 +78,24 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         _mouseHookIconWindow = mouseHookIconWindow;
         _mouseHookIconWindow.DataContext = this;
         Utilities.MousePointSelected += OnMousePointSelected;
+        Settings.PropertyChanged += OnSettingsChanged;
 
         _i18n.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    // 修改后的 OnSettingsChanged
+    private void OnSettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Settings.ShowMouseHookIcon))
+        {
+            if (IsMouseHook)
+            {
+                // 只保留这一行，更新底层逻辑即可
+                Utilities.IsAutomaticCopy = IsTopmost || !Settings.ShowMouseHookIcon;
+                
+                // 删掉了强制 Show() 和 IsTopmost = true 的代码
+            }
+        }
     }
 
     private void OnLanguageChanged()
@@ -1664,6 +1680,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         _i18n.OnLanguageChanged -= OnLanguageChanged;
+        Settings.PropertyChanged -= OnSettingsChanged;
         GC.SuppressFinalize(this);
     }
 
