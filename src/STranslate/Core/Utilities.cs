@@ -553,9 +553,19 @@ public class Utilities
     /// </summary>
     public static bool IsAutomaticCopy { get; set; } = true;
 
+    /// <summary>
+    /// 鼠标划词文本选择事件 (自动取词模式下触发)
+    /// </summary>
     public static event Action<string>? MouseTextSelected;
+
+    /// <summary>
+    /// 鼠标划词结束事件 (非自动取词模式下触发，仅传递位置)
+    /// </summary>
     public static event Action<System.Drawing.Point>? MousePointSelected;
 
+    /// <summary>
+    /// 启动鼠标划词监听
+    /// </summary>
     public static async Task StartMouseTextSelectionAsync()
     {
         if (_isMouseListening) return;
@@ -565,9 +575,13 @@ public class Utilities
         _mouseHook.MouseDragFinished += OnDragFinished;
 
         _isMouseListening = true;
+
         await Task.Delay(100);
     }
 
+    /// <summary>
+    /// 停止鼠标划词监听
+    /// </summary>
     public static void StopMouseTextSelection()
     {
         if (!_isMouseListening) return;
@@ -595,10 +609,9 @@ public class Utilities
 
     private static void OnDragStarted(object? sender, System.Windows.Forms.MouseEventArgs e)
     {
+        // 只有自动模式才需要在开始时记录旧文本
         if (IsAutomaticCopy)
-        {
             _oldText = GetText() ?? string.Empty;
-        }
     }
 
     private static void OnDragFinished(object? sender, System.Windows.Forms.MouseEventArgs e)
@@ -607,7 +620,7 @@ public class Utilities
         {
             if (IsAutomaticCopy)
             {
-                // ... (置顶模式代码保持不变) ...
+                // 原有逻辑：置顶模式下，直接复制取词
                 _ = Task.Run(async () =>
                 {
                     var selectedText = await GetSelectedTextAsync();
@@ -619,61 +632,10 @@ public class Utilities
             }
             else
             {
-                // ★★★ 修改调用处 ★★★
-                // 支持 文本光标(IBEAM) 和 手型光标(HAND)
-                if (IsValidCursor())
-                {
-                    MousePointSelected?.Invoke(e.Location);
-                }
+                // 新逻辑：图标模式下，不复制，只通知位置
+                MousePointSelected?.Invoke(e.Location);
             }
         }
-    }
-
-    // --- ↓↓↓ 新增：光标检测逻辑 ↓↓↓ ---
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct CURSORINFO
-    {
-        public int cbSize;
-        public int flags;
-        public IntPtr hCursor;
-        public System.Drawing.Point ptScreenPos;
-    }
-
-    [DllImport("user32.dll")]
-    private static extern bool GetCursorInfo(ref CURSORINFO pci);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
-
-    private const int IDC_IBEAM = 32513; // 文本选择光标
-    private const int IDC_HAND = 32649;  // 手型光标 (链接/按钮)
-
-    /// <summary>
-    /// 判断当前鼠标光标是否为有效的文本选择状态 (I-Beam 或 Hand)
-    /// </summary>
-    private static bool IsValidCursor()
-    {
-        try
-        {
-            var ci = new CURSORINFO();
-            ci.cbSize = Marshal.SizeOf(ci);
-            
-            if (GetCursorInfo(ref ci))
-            {
-                // 获取系统标准光标句柄
-                var hIBeam = LoadCursor(IntPtr.Zero, IDC_IBEAM);
-                var hHand = LoadCursor(IntPtr.Zero, IDC_HAND);
-                
-                // 只要是“工字形”或者“小手”，都认为是想选中文本
-                return ci.hCursor == hIBeam || ci.hCursor == hHand;
-            }
-        }
-        catch (Exception)
-        {
-            // 容错处理
-        }
-        return false;
     }
 
     #endregion
