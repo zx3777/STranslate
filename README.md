@@ -1,70 +1,4 @@
-<div align="center">
-
-<p>
-<a href="https://github.com/STranslate/STranslate" target="_blank">
-<img align="center" alt="STranslate" width="200" src="./images/favicon.svg" />
-</a>
-</p>
-<p>
-<a href="https://github.com/STranslate/STranslate/blob/main/LICENSE" target="_self">
- <img alt="Latest GitHub release" src="https://img.shields.io/github/license/ZGGSONG/STranslate" />
-</a>
-<a href="https://github.com/STranslate/STranslate/releases/latest" target="_blank">
- <img alt="Latest GitHub release" src="https://img.shields.io/github/release/ZGGSONG/STranslate.svg" />
-</a>
-<a href="https://github.com/STranslate/STranslate/releases" target="_self">
- <img alt="Downloads" src="https://img.shields.io/github/downloads/ZGGSONG/STranslate/total" />
-</a>
-<a href="https://github.com/STranslate/STranslate/discussions" target="_self">
- <img alt="Discussions" src="https://img.shields.io/github/discussions/ZGGSONG/STranslate" />
-</a>
-</p>
-
-<h1 align="center">STranslate 2.0</h1>
-
-**English** | [**简体中文**](./README_ZH.md)
-
-<a href="https://trendshift.io/repositories/6979" target="_blank"><img src="https://trendshift.io/api/badge/repositories/6979" alt="ZGGSONG%2FSTranslate | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
-<p align="center">A <strong>ready-to-go</strong> translation and OCR tool developed with WPF.</p>
-
-</div>
-
-## Access
-
-| Overseas | Domestic |
-| :--: | :--: |
-| **[Github](https://github.com/STranslate/STranslate)** | **[Gitee](https://gitee.com/zggsong/STranslate)** |
-
-## Installation
-
-Download the latest [Release](https://github.com/STranslate/STranslate/releases) version and extract it to use.
-
-## Usage
-
-[Document](https://stranslate.zggsong.com)
-
-## Discussion
-
-If you have questions, please go to [Discussions](https://github.com/STranslate/STranslate/discussions) for discussion.
-
-> If you want to join the user exchange group, you can scan the QR code below
-
-<img src="./images/telegram_group.jpg" Width="160" />
-
-## Support the project
-
-<a href="https://jb.gg/OpenSourceSupport"><img src="./images/jb_beam.svg" /></a>
-
-## Donations
-
-If you like it, you can buy the author a cup of coffee.
-
-> Thank you to those who rewarded me [Sponsor List](Sponsor.md)
-
-| WeChat | Alipay |
-| :--: | :--: |
-|![wehcatpay](./images/wechatpay.jpg) | ![alipay](./images/alipay.jpg) |
+划词后可以点击图标显示翻译结果。
 
 ## Author & Maintainer
 
@@ -77,9 +11,4 @@ Copyright © [zggsong](https://github.com/zggsong)
 - License: [MIT](./LICENSE)
 
 > [Website](https://stranslate.zggsong.com) [Blog](https://www.zggsong.com)
-
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=ZGGSONG/STranslate&type=Date)](https://star-history.com/#ZGGSONG/STranslate&Date)
 
